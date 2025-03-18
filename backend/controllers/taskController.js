@@ -5,6 +5,7 @@ export const addTask = async (req, res) => {
   try {
     // Check if a task with the same parameters already exists
     const existingTask = await taskModels.findOne({
+      category: req.body.category,
       title: req.body.title,
       description: req.body.description,
       dueDate: req.body.dueDate,

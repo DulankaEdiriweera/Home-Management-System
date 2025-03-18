@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
+import * as Yup from "yup";
 
 const ReusableForm = ({ fields, onSubmit, onCancel, readOnly }) => {
   const [formData, setFormData] = useState({});
+  const [errors, setErrors] = useState({});
 
   // Set the formData when fields are passed (for viewing or editing)
   useEffect(() => {
@@ -22,10 +24,58 @@ const ReusableForm = ({ fields, onSubmit, onCancel, readOnly }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  // Define the validation schema using Yup
+  const validationSchema = Yup.object(
+    fields.reduce((acc, field) => {
+      if (field.required) {
+        acc[field.name] = Yup.string()
+          .required(`${field.label} is required`)
+          .positive(`${field.label} must be a positive number`)
+          .min(1, `${field.label} must be at least 1 character`);
+      }
+      if (field.type === "text") {
+        acc[field.name] = Yup.string()
+          .required(`${field.label} is required`)
+      }
+      if (field.type === "number") {
+        acc[field.name] = Yup.number()
+          .required(`${field.label} is required`)
+          .min(1, `${field.label} must be greater than 0`);
+      }
+      if (field.type === "select") {
+        acc[field.name] = Yup.string()
+          .required(`${field.label} is required`)
+          .notOneOf([""], `${field.label} must be selected`);
+      }
+      if (field.name === "expiryDate") {
+        acc[field.name] = Yup.date()
+          .required("Expiry Date is required")
+          .min(new Date(), "Expiry date cannot be in the past");
+      }
+      return acc;
+    }, {})
+  );
+
+  // Validation function
+  const validate = async () => {
+    try {
+      await validationSchema.validate(formData, { abortEarly: false });
+      setErrors({});
+      return true;
+    } catch (err) {
+      const newErrors = err.inner.reduce((acc, error) => {
+        acc[error.path] = error.message;
+        return acc;
+      }, {});
+      setErrors(newErrors);
+      return false;
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!readOnly) {
-      onSubmit(formData); // Only submit if not in read-only mode
+    if (!readOnly && await validate()) {
+      onSubmit(formData); // Only submit if not in read-only mode and validation passes
     }
   };
 
@@ -52,6 +102,18 @@ const ReusableForm = ({ fields, onSubmit, onCancel, readOnly }) => {
                   </option>
                 ))}
               </select>
+            ) : 
+            field.name === "expiryDate" ? (
+              <input
+                type="date"
+                name={field.name}
+                value={formData[field.name] || ""}
+                onChange={handleChange}
+                placeholder={field.placeholder}
+                disabled={readOnly} // Disable the input if read-only
+                className="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
+                min={new Date().toISOString().split("T")[0]} // Prevent past dates
+              />
             ) : (
               <input
                 type={field.type}
@@ -62,6 +124,10 @@ const ReusableForm = ({ fields, onSubmit, onCancel, readOnly }) => {
                 disabled={readOnly} // Disable the input if read-only
                 className="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
               />
+            )}
+            {/* Show error message if validation fails */}
+            {errors[field.name] && (
+              <span className="text-red-500 text-sm">{errors[field.name]}</span>
             )}
           </div>
         ))}

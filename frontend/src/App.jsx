@@ -26,18 +26,12 @@ const App = () => {
           element={<FurnitureAndElectronics />}
         />
         <Route path="/toolsAndMaintainence" element={<ToolsAndMaintainence />} />
+        <Route path="/tasks" element={<TaskPage />} />
       </Routes>
       <Footer />
     </div>
   );
-  return <div className="mx-4 sm:mx-[1%]">
-    <Header />
-    <Routes>
-      <Route path='/' element={<Home />} />
-      <Route path="/tasks" element={<TaskPage />} />
-    </Routes>
-    <Footer />
-  </div>;
+
 };
 
 export default App;

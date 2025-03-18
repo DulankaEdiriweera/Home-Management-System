@@ -4,6 +4,7 @@ import "dotenv/config";
 import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
 import foodAndBeveragesRoute from "./routes/foodAndBeveragesRoutes.js";
+import taskRoutes from "./routes/taskRoutes.js"
 
 //App Config
 const app = express();
@@ -21,8 +22,8 @@ app.get("/", (req, res) => {
 });
 
 app.use("/inventory/foodAndBeverages", foodAndBeveragesRoute);
+app.use("/task",taskRoutes);
 
 app.listen(port, () => console.log("Server Started", port));
 
-//Use routes
-app.use("/task",taskRoutes);
+

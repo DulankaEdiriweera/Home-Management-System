@@ -23,3 +23,6 @@ app.get("/", (req, res) => {
 app.use("/inventory/foodAndBeverages", foodAndBeveragesRoute);
 
 app.listen(port, () => console.log("Server Started", port));
+
+//Use routes
+app.use("/task",taskRoutes);

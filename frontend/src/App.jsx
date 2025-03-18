@@ -9,6 +9,7 @@ import CleaningSupplies from "./pages/CleaningSupplies";
 import PersonalCare from "./pages/PersonalCare";
 import FurnitureAndElectronics from "./pages/FurnitureAndElectronics";
 import ToolsAndMaintainence from "./pages/ToolsAndMaintainenceItems"
+import TaskPage from "./pages/TaskPage";
 
 const App = () => {
   return (
@@ -25,10 +26,12 @@ const App = () => {
           element={<FurnitureAndElectronics />}
         />
         <Route path="/toolsAndMaintainence" element={<ToolsAndMaintainence />} />
+        <Route path="/tasks" element={<TaskPage />} />
       </Routes>
       <Footer />
     </div>
   );
+
 };
 
 export default App;

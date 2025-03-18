@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const taskSchema = new mongoose.Schema(
   {
+    category: {
+      type: String,
+      required: true,
+      enum: ["Cooking", "Billing", "Cleaning", "Work","Other"],
+    },
     title: {
       type: String,
       required: true,

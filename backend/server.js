@@ -21,8 +21,6 @@ app.get("/", (req, res) => {
   res.send("API WORKING");
 });
 
-//Use routes
-app.use("/task",taskRoutes);
 app.use("/inventory/foodAndBeverages", foodAndBeveragesRoute);
 app.use("/task",taskRoutes);
 

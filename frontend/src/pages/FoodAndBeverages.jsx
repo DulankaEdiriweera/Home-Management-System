@@ -6,6 +6,8 @@ import { Link, useNavigate } from "react-router-dom";
 import SideBarInventory from "../components/SideBarInventory";
 import ReusablePopUp from "../components/ReusablePopUp";
 import ReusableForm from "../components/ReusableForm";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 const FoodAndBeverages = () => {
   const navigate = useNavigate();
@@ -255,6 +257,86 @@ const FoodAndBeverages = () => {
     }
   };
 
+  // Download PDF
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+  
+    // Add title with style
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("Food & Beverages Inventory Report", 14, 20);
+  
+    // Add space after the title
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("Generated on: " + new Date().toLocaleDateString(), 14, 28);
+  
+    // Group items by category
+    const categoryData = {};
+    filteredItems.forEach((item) => {
+      if (!categoryData[item.category]) {
+        categoryData[item.category] = [];
+      }
+      categoryData[item.category].push(item);
+    });
+  
+    let startY = 40; // Start position for tables
+  
+    // Loop through categories
+    Object.entries(categoryData).forEach(([category, items]) => {
+      // Category header
+      doc.setFontSize(14);
+      doc.setFont("helvetica", "bold");
+      doc.text(category, 14, startY); // Category Title
+      startY += 8; // Move down
+  
+      // Table header with style
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      const tableHeader = [
+        ["Item Name", "Quantity","Weight / Volume", "Unit", "Expiry Date", "Storage Location", "Minimum Level"],
+      ];
+  
+      // Table data
+      const tableData = items.map((item) => [
+        item.itemName,
+        item.quantity,
+        item.weightVolume,
+        item.unitOfMeasure,
+        item.expiryDate
+          ? new Date(item.expiryDate).toISOString().split("T")[0]
+          : "N/A",
+        item.storageTypeLocation || "N/A",
+        item.minimumLevel,
+      ]);
+  
+      // Add table
+      autoTable(doc, {
+        startY,
+        head: tableHeader,
+        body: tableData,
+        theme: 'grid', // Add grid theme
+        headStyles: { fillColor: [59, 130, 246], textColor: [255, 255, 255] },  // Header background color
+        bodyStyles: { fillColor: [240, 240, 240] }, // Body row background color
+        styles: { fontSize: 10, cellPadding: 3, halign: "center" },
+      });
+  
+      // Update Y position for the next category
+      startY = doc.lastAutoTable.finalY + 10;
+  
+      // Total items in category
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "bold");
+      doc.text(`Total Items of ${category}: ${items.length}`, 14, startY);
+  
+      // Add some spacing before the next category
+      startY += 15;
+    });
+  
+    // Save the generated PDF
+    doc.save("Food_Beverages_Inventory.pdf");
+  };
+  
 
   return (
     <div className="flex p-2">
@@ -323,7 +405,10 @@ const FoodAndBeverages = () => {
             >
               Items Close to Expire
             </button>
-            <button className="bg-green-600 text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2 hover:bg-green-700 shadow-md">
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2 hover:bg-green-700 shadow-md"
+              onClick={handleExportPDF}
+            >
               <FaFilePdf /> Export PDF
             </button>
           </div>

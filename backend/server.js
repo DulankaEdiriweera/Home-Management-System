@@ -5,6 +5,7 @@ import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
 import foodAndBeveragesRoute from "./routes/foodAndBeveragesRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js"
+import shoppingListRoutes from "./routes/shoppingListRoutes.js"
 
 //App Config
 const app = express();
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 
 app.use("/inventory/foodAndBeverages", foodAndBeveragesRoute);
 app.use("/task",taskRoutes);
+app.use("/shoppingList",shoppingListRoutes);
 
 app.listen(port, () => console.log("Server Started", port));
 

@@ -7,6 +7,7 @@ import foodAndBeveragesRoute from "./routes/foodAndBeveragesRoutes.js";
 import cleaningSuppliesRoute from "./routes/cleaningSuppliesRoutes.js";
 import personalCareRoute from "./routes/personalCareRoute.js"
 import householdItemRoute from "./routes/householdItemRoute.js";
+import toolsAndMaintainenceRoute from "./routes/toolsRoute.js";
 import taskRoutes from "./routes/taskRoutes.js"
 import expenseRoutes from "./routes/expenseRoutes.js";
 import shoppingListRoutes from "./routes/shoppingListRoutes.js"
@@ -30,6 +31,7 @@ app.use("/inventory/foodAndBeverages", foodAndBeveragesRoute);
 app.use("/inventory/cleaningSupplies", cleaningSuppliesRoute);
 app.use("/inventory/personalCare", personalCareRoute);
 app.use("/inventory/householdItems", householdItemRoute);
+app.use("/inventory/toolItems", toolsAndMaintainenceRoute);
 
 app.use("/task",taskRoutes);
 

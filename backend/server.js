@@ -4,6 +4,7 @@ import "dotenv/config";
 import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
 import foodAndBeveragesRoute from "./routes/foodAndBeveragesRoutes.js";
+import cleaningSuppliesRoute from "./routes/cleaningSuppliesRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js"
 import expenseRoutes from "./routes/expenseRoutes.js";
 
@@ -23,6 +24,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/inventory/foodAndBeverages", foodAndBeveragesRoute);
+app.use("/inventory/cleaningSupplies", cleaningSuppliesRoute);
 app.use("/task",taskRoutes);
 
 app.use("/expenses", expenseRoutes);

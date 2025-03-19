@@ -9,6 +9,7 @@ import personalCareRoute from "./routes/personalCareRoute.js"
 import householdItemRoute from "./routes/householdItemRoute.js";
 import taskRoutes from "./routes/taskRoutes.js"
 import expenseRoutes from "./routes/expenseRoutes.js";
+import shoppingListRoutes from "./routes/shoppingListRoutes.js"
 
 //App Config
 const app = express();
@@ -33,6 +34,7 @@ app.use("/inventory/householdItems", householdItemRoute);
 app.use("/task",taskRoutes);
 
 app.use("/expenses", expenseRoutes);
+app.use("/shoppingList",shoppingListRoutes);
 
 app.listen(port, () => console.log("Server Started", port));
 

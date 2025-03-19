@@ -11,11 +11,35 @@ const ReusableTable = ({ columns, data, onRowClick }) => {
   const startIndex = (currentPage - 1) * rowsPerPage;
   const currentRows = data.slice(startIndex, startIndex + rowsPerPage);
 
+  // Function to determine row background color based on stock and expiry date
+  const getRowClassName = (row) => {
+    const today = new Date();
+    const expiryDate = new Date(row.expiryDate);
+    const timeDiff = expiryDate - today;
+    const daysToExpiry = timeDiff / (1000 * 3600 * 24);
+
+    if ((row.quantity <= row.minimumLevel) && (daysToExpiry <= 3)) {
+      return "bg-gradient-to-r from-red-100 to-orange-100"; 
+      ;  
+    } else if (daysToExpiry <= 3) {
+      return "bg-gradient-to-r from-red-300 via-red-400 to-red-300"; // Close to expiry
+    } else if (row.quantity <= row.minimumLevel) {
+      return "bg-gradient-to-r from-orange-100 via-orange-300 to-orange-100"; // Low stock
+    }
+    return ""; // Default (no color)
+    
+    
+    
+    
+    
+  };
+
+
   return (
     <div className="overflow-x-auto p-4">
       <table className="min-w-full border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
         {/* Table Header */}
-        <thead className="bg-gradient-to-r from-blue-400 to-purple-400 text-white">
+        <thead className="bg-gradient-to-r from-blue-400 to-blue-400 text-white">
           <tr>
             {columns.map((column, index) => (
               <th
@@ -34,8 +58,8 @@ const ReusableTable = ({ columns, data, onRowClick }) => {
             <tr
               key={rowIndex}
               className={`border-b last:border-b-0 ${
-                rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white"
-              } hover:bg-indigo-200 transition-all ${
+                getRowClassName(row) || (rowIndex % 2 === 0 ? "bg-gray-100" : "bg-white")
+              } hover:bg-indigo-50 transition-all ${
                 onRowClick ? "cursor-pointer" : ""
               }`}
               onClick={() => onRowClick && onRowClick(row)}

@@ -338,6 +338,27 @@ const FoodAndBeverages = () => {
   };
   
 
+  // Define the getRowClassName function in the parent component
+  const getRowClassName = (row) => {
+    const today = new Date().toISOString().split("T")[0];
+    const expiryDate = new Date(row.expiryDate).toISOString().split("T")[0];
+    const timeDiff = expiryDate - today;
+    const daysToExpiry = timeDiff;
+
+    if ((row.quantity <= row.minimumLevel) && (daysToExpiry <= 3)) {
+      return "bg-gradient-to-r from-red-100 via-red-400 to-red-100";  
+    } else if (daysToExpiry <= 3) {
+      return "bg-gradient-to-r from-red-100 via-red-500 to-red-100"; // Close to expiry
+    } else if (row.quantity <= row.minimumLevel) {
+      return "bg-gradient-to-r from-red-100 via-red-300 to-red-100"; // Low stock
+    }
+    return ""; // Default (no color)
+    
+    
+    
+    
+  };
+
   return (
     <div className="flex p-2">
       {/* Sidebar */}
@@ -452,7 +473,7 @@ const FoodAndBeverages = () => {
                     </button>
                   ),
                 }))}
-              />
+                getRowClassName={getRowClassName}/>
             </div>
           )}
         </div>

@@ -58,10 +58,11 @@ const InventoryHome = () => {
           <Link to="/furnitureAndElectronics" className="h-full">
             <div className="h-full bg-gradient-to-r from-gray-400 to-gray-500 text-white p-6 rounded-2xl shadow-md relative cursor-pointer hover:scale-105 transition-transform duration-200">
               <h2 className="text-lg font-semibold mb-5">
-                FURNITURE & ELECTRONIC ITEMS
+                HOUSEHOLD ITEMS
               </h2>
               <p>FURNITURE</p>
               <p>ELECTRONIC ITEMS</p>
+              <p>KITCHEN ITEMS</p>
               <p>LIGHTINGS</p>
               <MdChair className="absolute bottom-4 right-4 text-8xl" />
             </div>

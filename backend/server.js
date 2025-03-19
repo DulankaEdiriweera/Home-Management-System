@@ -3,6 +3,8 @@ import cors from "cors";
 import "dotenv/config";
 import connectDB from "./config/mongodb.js";
 import connectCloudinary from "./config/cloudinary.js";
+import foodAndBeveragesRoute from "./routes/foodAndBeveragesRoutes.js";
+import taskRoutes from "./routes/taskRoutes.js"
 import expenseRoutes from "./routes/expenseRoutes.js";
 
 //App Config
@@ -20,6 +22,11 @@ app.get("/", (req, res) => {
   res.send("API WORKING");
 });
 
+app.use("/inventory/foodAndBeverages", foodAndBeveragesRoute);
+app.use("/task",taskRoutes);
+
 app.use("/expenses", expenseRoutes);
 
 app.listen(port, () => console.log("Server Started", port));
+
+

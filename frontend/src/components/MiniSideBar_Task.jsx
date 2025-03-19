@@ -31,7 +31,7 @@ const TaskSideBar = ({ onFilterChange }) => {
     };
 
     return (
-        <div className="w-64 bg-[#3B82F6] text-white min-h-screen p-5 rounded-2xl">
+        <div className="w-64 bg-blue-500 text-white min-h-screen p-5 rounded-2xl">
             <h2 className="text-2xl font-semibold mb-6">Task Filters</h2>
 
             {/* Category Filter */}

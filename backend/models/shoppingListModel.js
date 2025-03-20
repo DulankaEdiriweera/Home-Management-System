@@ -14,7 +14,7 @@ const shoppingListSchema = new mongoose.Schema(
     category: {
       type: String,
       required: true,
-      enum: ["Groceries", "Household", "Electronics", "Others"], // Adjust as needed
+      enum: ["Groceries", "Household", "Electronics", "personal Care", "Furniture", "Other"], // Adjust as needed
     },
     priority: {
       type: String,

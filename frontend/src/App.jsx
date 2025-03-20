@@ -12,6 +12,7 @@ import ToolsAndMaintainence from "./pages/ToolsAndMaintainenceItems"
 import TaskPage from "./pages/TaskPage";
 import ExpensesHome from "./pages/ExpensesHome";
 import ExpenseForm from "./pages/ExpensesForm";
+import MonthlyBudget from "./pages/MonthlyBudgetPage";
 
 
 const App = () => {
@@ -32,7 +33,7 @@ const App = () => {
         <Route path="/tasks" element={<TaskPage />} />
         <Route path="/expenses" element={<ExpensesHome/>} />
         <Route path="/expensesAdd" element={<ExpenseForm/>} />
-        
+        <Route path="/monthlyBudget" element={<MonthlyBudget />} />
         
       </Routes>
       <Footer />

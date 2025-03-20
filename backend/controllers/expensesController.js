@@ -8,6 +8,7 @@ export const addExpense = async (req,res) =>{
         //check if an expense record with the same parameters already exists 
         const existingExpense = await expense.findOne({
             amount:req.body.amount,
+            month:req.body.month,
             date:req.body.date,
             category:req.body.category,
             paymentMethod:req.body.paymentMethod,

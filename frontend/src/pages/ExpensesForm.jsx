@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import ExpenseSidebar from '../components/ExpensesSideBar';
 
 const ExpenseForm = () => {
   const [expenses, setExpenses] = useState([]);
@@ -82,8 +83,13 @@ const ExpenseForm = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-      <h2 className="text-3xl font-semibold mb-6 text-center">{isUpdating ? "Update" : "Add"} Expense</h2>
+    <div className="flex p-2">
+            {/* Sidebar */}
+            <ExpenseSidebar />
+
+            {/* Main Content */}
+            <div className="flex-1 p-6 bg-gray-200 h-screen rounded-2xl ml-4 overflow-y-auto">
+            <h2 className="text-3xl font-semibold mb-6 text-center">{isUpdating ? "Update" : "Add"} Expense</h2>
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
         <label>Amount</label>
         <input
@@ -179,7 +185,8 @@ const ExpenseForm = () => {
           </tbody>
         </table>
       </div>
-    </div>
+            </div>
+        </div>
   );
 };
 

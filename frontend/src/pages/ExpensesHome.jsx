@@ -1,5 +1,5 @@
 import React from 'react';
-//import ExpenseSidebar from '../components/ExpensesSideBar';
+import ExpenseSidebar from '../components/ExpensesSideBar';
 
 const ExpensesHome = () => {
     return (

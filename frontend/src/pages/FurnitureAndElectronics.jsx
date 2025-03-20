@@ -29,7 +29,7 @@ const FurnitureAndElectronics = () => {
 
   // Fetch Household items from backend using Axios
   useEffect(() => {
-    const fetchToolItems = async () => {
+    const fetchHouseholdItems = async () => {
       try {
         const response = await axios.get(
           "http://localhost:4000/inventory/householdItems"
@@ -43,7 +43,7 @@ const FurnitureAndElectronics = () => {
       }
     };
 
-    fetchToolItems();
+    fetchHouseholdItems();
   }, []);
 
   const filteredItems = householdItems.filter(
@@ -293,17 +293,26 @@ const FurnitureAndElectronics = () => {
                 data={filteredItems.map((item) => ({
                   ...item,
                   viewAction: (
-                    <button className="text-green-700 hover:underline flex items-center" onClick={() => handleViewClick(item._id)}>
+                    <button
+                      className="text-green-700 hover:underline flex items-center"
+                      onClick={() => handleViewClick(item._id)}
+                    >
                       <FaEye size={25} />
                     </button>
                   ),
                   editAction: (
-                    <button className="text-blue-700 hover:underline flex items-center" onClick={() => handleEditClick(item._id)}>
+                    <button
+                      className="text-blue-700 hover:underline flex items-center"
+                      onClick={() => handleEditClick(item._id)}
+                    >
                       <FaEdit size={25} />
                     </button>
                   ),
                   deleteAction: (
-                    <button className="text-red-700 hover:underline flex items-center" onClick={() => handleDeleteClick(item._id)}>
+                    <button
+                      className="text-red-700 hover:underline flex items-center"
+                      onClick={() => handleDeleteClick(item._id)}
+                    >
                       <FaTrash size={25} />
                     </button>
                   ),
@@ -378,13 +387,13 @@ const FurnitureAndElectronics = () => {
                 name: "itemName",
                 label: "Item Name",
                 type: "text",
-                value: editItem.itemName, 
+                value: editItem.itemName,
               },
               {
                 name: "category",
                 label: "Category",
                 type: "select",
-                value: editItem.category, 
+                value: editItem.category,
                 options: [
                   "Furniture",
                   "Kitchen Item",
@@ -397,18 +406,18 @@ const FurnitureAndElectronics = () => {
                 name: "quantity",
                 label: "Quantity",
                 type: "number",
-                value: editItem.quantity, 
+                value: editItem.quantity,
               },
               {
                 name: "storageTypeLocation",
                 label: "Storage Type / Location",
                 type: "text",
-                value: editItem.storageTypeLocation, 
+                value: editItem.storageTypeLocation,
               },
             ]}
-            onSubmit={handleSubmit} 
-            onCancel={() => setIsEditModalOpen(false)} 
-            readOnly={false} 
+            onSubmit={handleSubmit}
+            onCancel={() => setIsEditModalOpen(false)}
+            readOnly={false}
           />
         )}
       </ReusablePopUp>

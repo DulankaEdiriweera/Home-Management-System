@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ReusableTable from "../components/ReusableTable";
 import { FaSearch, FaFilePdf, FaEye, FaEdit, FaTrash } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import SideBarInventory from "../components/SideBarInventory";
 import ReusablePopUp from "../components/ReusablePopUp";
 import ReusableForm from "../components/ReusableForm";

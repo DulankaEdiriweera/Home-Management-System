@@ -27,21 +27,33 @@ const TaskPage = () => {
         priority: '',
         search: ''
     });
+    const [formErrors, setFormErrors] = useState({
+        title: "",
+        description: "",
+        dueDate: "",
+    });
+
+    // Calculate today's date for min attribute on date input
+    const getTodayDate = () => {
+        const today = new Date();
+        return today.toISOString().split('T')[0];
+    };
+
+    const fetchTasks = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.get(`http://localhost:4000/task?_limit=${taskCount}`);
+            setTasks(response.data);
+            // Apply filters to the newly fetched data
+            applyFilters(response.data);
+        } catch (err) {
+            setError("Failed to fetch tasks");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchTasks = async () => {
-            setLoading(true);
-            try {
-                const response = await axios.get(`http://localhost:4000/task?_limit=${taskCount}`);
-                setTasks(response.data);
-                // Apply filters to the newly fetched data
-                applyFilters(response.data);
-            } catch (err) {
-                setError("Failed to fetch tasks");
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchTasks();
     }, [taskCount]);
 
@@ -81,6 +93,31 @@ const TaskPage = () => {
         setFilteredTasks(result);
     };
 
+    const validateForm = (task) => {
+        // Create a new empty errors object each time
+        const errors = {};
+
+        if (!task.title.trim()) {
+            errors.title = "Title is required";
+        } else if (task.title.length < 3) {
+            errors.title = "Title must be at least 3 characters";
+        }
+
+        if (!task.description.trim()) {
+            errors.description = "Description is required";
+        }
+
+        if (!task.dueDate) {
+            errors.dueDate = "Due date is required";
+        }
+
+        // Return both the errors and whether the form is valid
+        return {
+            errors,
+            isValid: Object.keys(errors).length === 0
+        };
+    };
+
     const handleFilterChange = (filterType, value) => {
         setFilters(prevFilters => ({
             ...prevFilters,
@@ -108,16 +145,40 @@ const TaskPage = () => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setNewTask((prevTask) => ({ ...prevTask, [name]: value }));
+
+        // Clear error for the field being edited immediately
+        setFormErrors(prev => ({
+            ...prev,
+            [name]: ""
+        }));
+    };
+
+    const handleEditInputChange = (e) => {
+        const { name, value } = e.target;
+        setEditTask({ ...editTask, [name]: value });
+
+        // Clear error for the field being edited immediately
+        setFormErrors(prev => ({
+            ...prev,
+            [name]: ""
+        }));
     };
 
     const handleAddTask = async (e) => {
         e.preventDefault();
-        if (!newTask.title || !newTask.description) {
-            setError("Title and Description are required.");
+
+        const { errors, isValid } = validateForm(newTask);
+
+        if (!isValid) {
+            setFormErrors(errors);
             return;
         }
 
+        // Clear any remaining form errors
+        setFormErrors({});
+
         try {
+            setLoading(true);
             const response = await axios.post("http://localhost:4000/task", { ...newTask, createdAt: new Date() });
             setNewTask({
                 title: "",
@@ -130,11 +191,8 @@ const TaskPage = () => {
             });
             setShowAddForm(false);
 
-            // Update local state with the new task
-            const newTaskWithId = response.data;
-            setTasks(prevTasks => [...prevTasks, newTaskWithId]);
-            // Apply filters to include the new task if it matches
-            applyFilters([...tasks, newTaskWithId]);
+            // Fetch all tasks again to ensure we have the most up-to-date data
+            await fetchTasks();
 
             setMessage("Task added successfully!");
             setTimeout(() => {
@@ -145,29 +203,32 @@ const TaskPage = () => {
             setTimeout(() => {
                 setError("");
             }, 3000);
+        } finally {
+            setLoading(false);
         }
     };
 
     const handleEditTask = async (e) => {
         e.preventDefault();
-        if (!editTask.title || !editTask.description) {
-            setError("Title and Description are required.");
+
+        const { errors, isValid } = validateForm(editTask);
+
+        if (!isValid) {
+            setFormErrors(errors);
             return;
         }
 
+        // Clear any remaining form errors
+        setFormErrors({});
+
         try {
+            setLoading(true);
             await axios.put(`http://localhost:4000/task/${editTask._id}`, editTask);
             setEditTask(null);
             setShowEditForm(false);
 
-            // Update the task in the local state
-            const updatedTasks = tasks.map(task =>
-                task._id === editTask._id ? editTask : task
-            );
-            setTasks(updatedTasks);
-
-            // Apply filters to the updated task list
-            applyFilters(updatedTasks);
+            // Fetch all tasks again to ensure we have the most up-to-date data
+            await fetchTasks();
 
             setMessage("Task updated successfully!");
             setTimeout(() => {
@@ -178,6 +239,8 @@ const TaskPage = () => {
             setTimeout(() => {
                 setError("");
             }, 3000);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -185,14 +248,11 @@ const TaskPage = () => {
         const confirmDelete = window.confirm("Do you want to delete this task?");
         if (confirmDelete) {
             try {
+                setLoading(true);
                 await axios.delete(`http://localhost:4000/task/${taskId}`);
 
-                // Update local state
-                const remainingTasks = tasks.filter((task) => task._id !== taskId);
-                setTasks(remainingTasks);
-
-                // Apply filters to the remaining tasks
-                applyFilters(remainingTasks);
+                // Fetch all tasks again to ensure we have the most up-to-date data
+                await fetchTasks();
 
                 setMessage("Task deleted successfully!");
                 setTimeout(() => {
@@ -203,6 +263,8 @@ const TaskPage = () => {
                 setTimeout(() => {
                     setError("");
                 }, 3000);
+            } finally {
+                setLoading(false);
             }
         }
     };
@@ -238,6 +300,44 @@ const TaskPage = () => {
         }
     };
 
+    // Format date to YYYY-MM-DD for date input field
+    const formatDateForInput = (dateString) => {
+        if (!dateString) return "";
+        const date = new Date(dateString);
+        return date.toISOString().split('T')[0];
+    };
+
+    // Function to download tasks report as CSV
+    const downloadTasksReport = () => {
+        // CSV Header
+        let csvContent = "Title,Category,Description,Due Date,Priority,Status,Created At\n";
+
+        // Adding task data rows
+        filteredTasks.forEach(task => {
+            const dueDate = task.dueDate ? formatDate(task.dueDate) : "No date";
+            const createdAt = task.createdAt ? formatDate(task.createdAt) : "Unknown";
+
+            // Escape commas and quotes in text fields
+            const safeTitle = `"${task.title.replace(/"/g, '""')}"`;
+            const safeCategory = `"${task.category.replace(/"/g, '""')}"`;
+            const safeDescription = `"${task.description.replace(/"/g, '""')}"`;
+
+            csvContent += `${safeTitle},${safeCategory},${safeDescription},${dueDate},${task.priority},${task.status},${createdAt}\n`;
+        });
+
+        // Create downloadable blob
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+
+        // Create and trigger download link
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `tasks_report_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
     return (
         <div className="flex p-2 min-h-screen">
             <MiniSideBar_Task onFilterChange={handleFilterChange} />
@@ -245,24 +345,49 @@ const TaskPage = () => {
                 <h1 className="text-3xl font-semibold mb-6">Task List</h1>
                 <div className="flex items-center justify-between p-5">
                     <button
-                        onClick={() => setShowAddForm(true)}
+                        onClick={() => {
+                            setShowAddForm(true);
+                            setFormErrors({});
+                        }}
                         className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600"
                     >
                         + Add New Task
                     </button>
-                    <input
-                        type="text"
-                        placeholder="Search tasks..."
-                        value={filters.search}
-                        onChange={handleSearchChange}
-                        className="w-1/3 px-4 py-2 border rounded-2xl focus:ring-2 focus:ring-blue-400 shadow-md"
-                    />
+
+                    {/* Centered search with download button */}
+                    <div className="flex items-center justify-center flex-1 mx-4">
+                        <div className="relative w-2/3">
+                            <input
+                                type="text"
+                                placeholder="Search tasks..."
+                                value={filters.search}
+                                onChange={handleSearchChange}
+                                className="w-full px-4 py-2 border rounded-2xl focus:ring-2 focus:ring-blue-400 shadow-md"
+                            />
+                            <span className="absolute right-3 top-2 text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Download Report Button */}
+                    <button
+                        onClick={downloadTasksReport}
+                        className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Download Report
+                    </button>
                 </div>
 
                 {/* Display active filters */}
                 {(filters.category !== 'All' || filters.status || filters.priority || filters.search) && (
                     <div className="mb-4 px-6 py-2 bg-blue-100 rounded-lg flex flex-wrap items-center">
-                        <span className="mr-2 font-semibold">Active Filters:</span>
+                        <span className="mr-2 font-semibold"> Your Active Filters:</span>
                         {filters.category !== 'All' && (
                             <span className="bg-blue-200 px-3 py-1 rounded-full text-sm mr-2">
                                 Category: {filters.category}
@@ -295,9 +420,9 @@ const TaskPage = () => {
                 {/* Display task count */}
                 <div className="px-6 mb-2">
                     <p className="text-gray-600">
-                        Showing {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'}
+                        Showing count of {filteredTasks.length} {filteredTasks.length === 1 ? 'task' : 'tasks'}
                         {(filters.category !== 'All' || filters.status || filters.priority || filters.search) &&
-                            ` (filtered from ${tasks.length})`}
+                            ` ( from all ${tasks.length} tasks)`}
                     </p>
                 </div>
 
@@ -310,174 +435,228 @@ const TaskPage = () => {
                     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                         <div className="bg-white p-6 rounded-lg shadow-xl w-1/3">
                             <h2 className="text-xl font-semibold mb-4">Add New Task</h2>
-                            <label className="block mb-1">Title</label>
-                            <input
-                                type="text"
-                                name="title"
-                                placeholder="Add Title"
-                                value={newTask.title}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded mb-3"
-                            />
-                            <label className="block mb-1">Category</label>
-                            <select
-                                name="category"
-                                value={newTask.category}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded mb-3"
-                            >
-                                <option value="Cooking">Cooking</option>
-                                <option value="Cleaning">Cleaning</option>
-                                <option value="Study">Study</option>
-                                <option value="Work">Work</option>
-                                <option value="Billing">Billing</option>
-                                <option value="Other">Other</option>
-                            </select>
-                            <label className="block mb-1">Description</label>
-                            <textarea
-                                name="description"
-                                placeholder="Add Description"
-                                value={newTask.description}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded mb-3"
-                            />
-                            <label className="block mb-1">Due Date</label>
-                            <input
-                                type="date"
-                                name="dueDate"
-                                value={newTask.dueDate}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded mb-3"
-                            />
-                            <label className="block mb-1">Priority</label>
-                            <select
-                                name="priority"
-                                value={newTask.priority}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded mb-3"
-                            >
-                                <option value="Low">Low</option>
-                                <option value="Medium">Medium</option>
-                                <option value="High">High</option>
-                            </select>
-                            <label className="block mb-1">Status</label>
-                            <select
-                                name="status"
-                                value={newTask.status}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border rounded mb-3"
-                            >
-                                <option value="Not Started">Not Started</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Completed">Completed</option>
-                            </select>
+                            <form onSubmit={handleAddTask}>
+                                <div className="mb-3">
+                                    <label className="block mb-1">Title</label>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        placeholder="Add Title"
+                                        value={newTask.title}
+                                        onChange={handleInputChange}
+                                        className={`w-full p-2 border rounded ${formErrors.title ? 'border-red-500' : ''}`}
+                                    />
+                                    {formErrors.title && <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>}
+                                </div>
 
-                            {/* Buttons */}
-                            <div className="flex justify-between mt-4">
-                                <button
-                                    onClick={() => setShowAddForm(false)}
-                                    className="bg-gray-500 text-white px-4 py-2 rounded"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleAddTask}
-                                    className="bg-green-500 text-white px-4 py-2 rounded"
-                                >
-                                    Save
-                                </button>
-                            </div>
+                                <div className="mb-3">
+                                    <label className="block mb-1">Category</label>
+                                    <select
+                                        name="category"
+                                        value={newTask.category}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border rounded"
+                                    >
+                                        <option value="Cooking">Cooking</option>
+                                        <option value="Cleaning">Cleaning</option>
+                                        <option value="Study">Study</option>
+                                        <option value="Work">Work</option>
+                                        <option value="Billing">Billing</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="block mb-1">Description</label>
+                                    <textarea
+                                        name="description"
+                                        placeholder="Add Description"
+                                        value={newTask.description}
+                                        onChange={handleInputChange}
+                                        className={`w-full p-2 border rounded ${formErrors.description ? 'border-red-500' : ''}`}
+                                    />
+                                    {formErrors.description && <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>}
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="block mb-1">Due Date</label>
+                                    <input
+                                        type="date"
+                                        name="dueDate"
+                                        value={newTask.dueDate}
+                                        onChange={handleInputChange}
+                                        min={getTodayDate()}
+                                        className={`w-full p-2 border rounded ${formErrors.dueDate ? 'border-red-500' : ''}`}
+                                    />
+                                    {formErrors.dueDate && <p className="text-red-500 text-sm mt-1">{formErrors.dueDate}</p>}
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="block mb-1">Priority</label>
+                                    <select
+                                        name="priority"
+                                        value={newTask.priority}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border rounded"
+                                    >
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="block mb-1">Status</label>
+                                    <select
+                                        name="status"
+                                        value={newTask.status}
+                                        onChange={handleInputChange}
+                                        className="w-full p-2 border rounded"
+                                    >
+                                        <option value="Not Started">Not Started</option>
+                                        <option value="In Progress">In Progress</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                </div>
+
+                                {/* Buttons */}
+                                <div className="flex justify-between mt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowAddForm(false);
+                                            setFormErrors({});
+                                        }}
+                                        className="bg-gray-500 text-white px-4 py-2 rounded"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-green-500 text-white px-4 py-2 rounded"
+                                        disabled={loading}
+                                    >
+                                        {loading ? "Saving..." : "Save"}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 )}
-
 
                 {/* Edit Task Form */}
                 {showEditForm && (
                     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                         <div className="bg-white p-6 rounded-lg shadow-xl w-1/3">
                             <h2 className="text-xl font-semibold mb-4">Edit Task</h2>
-                            <label className="block mb-1">Title</label>
-                            <input
-                                type="text"
-                                name="title"
-                                placeholder="Edit Title"
-                                value={editTask?.title || ''}
-                                onChange={(e) => setEditTask({ ...editTask, title: e.target.value })}
-                                className="w-full p-2 border rounded mb-3"
-                            />
-                            <label className="block mb-1">Category</label>
-                            <select
-                                name="category"
-                                value={editTask?.category || ''}
-                                onChange={(e) => setEditTask({ ...editTask, category: e.target.value })}
-                                className="w-full p-2 border rounded mb-3"
-                            >
-                                <option value="Cooking">Cooking</option>
-                                <option value="Cleaning">Cleaning</option>
-                                <option value="Study">Study</option>
-                                <option value="Work">Work</option>
-                                <option value="Billing">Billing</option>
-                                <option value="Other">Other</option>
-                            </select>
-                            <label className="block mb-1">Description</label>
-                            <textarea
-                                name="description"
-                                placeholder="Edit Description"
-                                value={editTask?.description || ''}
-                                onChange={(e) => setEditTask({ ...editTask, description: e.target.value })}
-                                className="w-full p-2 border rounded mb-3"
-                            />
-                            <label className="block mb-1">Due Date</label>
-                            <input
-                                type="date"
-                                name="dueDate"
-                                value={editTask?.dueDate || ''}
-                                onChange={(e) => setEditTask({ ...editTask, dueDate: e.target.value })}
-                                className="w-full p-2 border rounded mb-3"
-                            />
-                            <label className="block mb-1">Priority</label>
-                            <select
-                                name="priority"
-                                value={editTask?.priority || ''}
-                                onChange={(e) => setEditTask({ ...editTask, priority: e.target.value })}
-                                className="w-full p-2 border rounded mb-3"
-                            >
-                                <option value="Low">Low</option>
-                                <option value="Medium">Medium</option>
-                                <option value="High">High</option>
-                            </select>
-                            <label className="block mb-1">Status</label>
-                            <select
-                                name="status"
-                                value={editTask?.status || ''}
-                                onChange={(e) => setEditTask({ ...editTask, status: e.target.value })}
-                                className="w-full p-2 border rounded mb-3"
-                            >
-                                <option value="Not Started">Not Started</option>
-                                <option value="In Progress">In Progress</option>
-                                <option value="Completed">Completed</option>
-                            </select>
+                            <form onSubmit={handleEditTask}>
+                                <div className="mb-3">
+                                    <label className="block mb-1">Title</label>
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        placeholder="Edit Title"
+                                        value={editTask?.title || ''}
+                                        onChange={handleEditInputChange}
+                                        className={`w-full p-2 border rounded ${formErrors.title ? 'border-red-500' : ''}`}
+                                    />
+                                    {formErrors.title && <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>}
+                                </div>
 
-                            {/* Buttons */}
-                            <div className="flex justify-between mt-4">
-                                <button
-                                    onClick={() => setShowEditForm(false)}
-                                    className="bg-gray-500 text-white px-4 py-2 rounded"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleEditTask}
-                                    className="bg-green-500 text-white px-4 py-2 rounded"
-                                >
-                                    Save Changes
-                                </button>
-                            </div>
+                                <div className="mb-3">
+                                    <label className="block mb-1">Category</label>
+                                    <select
+                                        name="category"
+                                        value={editTask?.category || ''}
+                                        onChange={handleEditInputChange}
+                                        className="w-full p-2 border rounded"
+                                    >
+                                        <option value="Cooking">Cooking</option>
+                                        <option value="Cleaning">Cleaning</option>
+                                        <option value="Study">Study</option>
+                                        <option value="Work">Work</option>
+                                        <option value="Billing">Billing</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="block mb-1">Description</label>
+                                    <textarea
+                                        name="description"
+                                        placeholder="Edit Description"
+                                        value={editTask?.description || ''}
+                                        onChange={handleEditInputChange}
+                                        className={`w-full p-2 border rounded ${formErrors.description ? 'border-red-500' : ''}`}
+                                    />
+                                    {formErrors.description && <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>}
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="block mb-1">Due Date</label>
+                                    <input
+                                        type="date"
+                                        name="dueDate"
+                                        value={editTask?.dueDate ? formatDateForInput(editTask.dueDate) : ''}
+                                        onChange={handleEditInputChange}
+                                        min={getTodayDate()}
+                                        className={`w-full p-2 border rounded ${formErrors.dueDate ? 'border-red-500' : ''}`}
+                                    />
+                                    {formErrors.dueDate && <p className="text-red-500 text-sm mt-1">{formErrors.dueDate}</p>}
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="block mb-1">Priority</label>
+                                    <select
+                                        name="priority"
+                                        value={editTask?.priority || ''}
+                                        onChange={handleEditInputChange}
+                                        className="w-full p-2 border rounded"
+                                    >
+                                        <option value="Low">Low</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="High">High</option>
+                                    </select>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label className="block mb-1">Status</label>
+                                    <select
+                                        name="status"
+                                        value={editTask?.status || ''}
+                                        onChange={handleEditInputChange}
+                                        className="w-full p-2 border rounded"
+                                    >
+                                        <option value="Not Started">Not Started</option>
+                                        <option value="In Progress">In Progress</option>
+                                        <option value="Completed">Completed</option>
+                                    </select>
+                                </div>
+
+                                {/* Buttons */}
+                                <div className="flex justify-between mt-4">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowEditForm(false);
+                                            setFormErrors({});
+                                        }}
+                                        className="bg-gray-500 text-white px-4 py-2 rounded"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="bg-green-500 text-white px-4 py-2 rounded"
+                                        disabled={loading}
+                                    >
+                                        {loading ? "Saving..." : "Save Changes"}
+                                    </button>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 )}
-
 
                 {/* Task List */}
                 <div className="pt-5 overflow-y-auto max-h-[calc(100vh-250px)]">
@@ -518,8 +697,9 @@ const TaskPage = () => {
                                     <div className="flex justify-between items-center mt-4">
                                         <button
                                             onClick={() => {
-                                                setEditTask(task); // Set the task to be edited
-                                                setShowEditForm(true); // Show the edit form
+                                                setEditTask(task);
+                                                setShowEditForm(true);
+                                                setFormErrors({});
                                             }}
                                             className="text-blue-500 hover:text-blue-700"
                                         >

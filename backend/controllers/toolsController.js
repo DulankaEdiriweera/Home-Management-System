@@ -1,10 +1,10 @@
-import householdItems from "../models/householdItemModel.js";
+import toolsAndMaintainenceItems from "../models/toolsModel.js";
 
-// Add a new Household Item
-export const addHouseholdItem = async (req, res) => {
+// Add a new Tools & Maintainence Item
+export const addToolSAndMaintanenceItem = async (req, res) => {
   try {
     // Check if an item with the same parameters already exists
-    const existingItem = await householdItems.findOne({
+    const existingItem = await toolsAndMaintainenceItems.findOne({
       itemName: req.body.itemName,
       category: req.body.category,
       expiryDate: req.body.expiryDate,
@@ -17,7 +17,7 @@ export const addHouseholdItem = async (req, res) => {
         .json({ message: "Item with the same parameters already exists" });
     }
 
-    const newItem = new householdItems(req.body);
+    const newItem = new toolsAndMaintainenceItems(req.body);
     const savedItem = await newItem.save();
     res
       .status(201)
@@ -29,10 +29,10 @@ export const addHouseholdItem = async (req, res) => {
   }
 };
 
-// Get all Household items
-export const getAllHouseholdItems = async (req, res) => {
+// Get all Tools & Maintainence items
+export const getAllToolSAndMaintanenceItems = async (req, res) => {
   try {
-    const items = await householdItems.find().sort({ updatedAt: -1 });
+    const items = await toolsAndMaintainenceItems.find().sort({ updatedAt: -1 });
     res.status(200).json(items);
   } catch (error) {
     res
@@ -41,10 +41,10 @@ export const getAllHouseholdItems = async (req, res) => {
   }
 };
 
-// Get a Household item by ID
-export const getHouseholdItemById = async (req, res) => {
+// Get a Tools & Maintainence item by ID
+export const getToolSAndMaintanenceItemById = async (req, res) => {
   try {
-    const item = await householdItems.findById(req.params.id);
+    const item = await toolsAndMaintainenceItems.findById(req.params.id);
 
     if (!item) {
       return res.status(404).json({ message: "Item not found" });
@@ -58,11 +58,11 @@ export const getHouseholdItemById = async (req, res) => {
   }
 };
 
-// Update a Household item by ID
-export const updateHouseholdItemById = async (req, res) => {
+// Update a Tools & Maintainence item by ID
+export const updateToolSAndMaintanenceItemById = async (req, res) => {
   try {
     // Find the item by ID and update it with the new data from the request body
-    const updatedItem = await householdItems.findByIdAndUpdate(
+    const updatedItem = await toolsAndMaintainenceItems.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true }
@@ -82,10 +82,10 @@ export const updateHouseholdItemById = async (req, res) => {
   }
 };
 
-// Delete a Household item by ID
-export const deleteHouseholdItemById = async (req, res) => {
+// Delete a Tools & Maintainence item by ID
+export const deleteToolSAndMaintanenceItemById = async (req, res) => {
   try {
-    const deletedItem = await householdItems.findByIdAndDelete(req.params.id);
+    const deletedItem = await toolsAndMaintainenceItems.findByIdAndDelete(req.params.id);
 
     if (!deletedItem) {
       return res.status(404).json({ message: "Item not found" });

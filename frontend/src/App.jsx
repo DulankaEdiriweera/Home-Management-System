@@ -10,10 +10,13 @@ import PersonalCare from "./pages/PersonalCare";
 import FurnitureAndElectronics from "./pages/FurnitureAndElectronics";
 import ToolsAndMaintainence from "./pages/ToolsAndMaintainenceItems"
 import TaskPage from "./pages/TaskPage";
+import ExpensesHome from "./pages/ExpensesHome";
+import ExpenseForm from "./pages/ExpensesForm";
+
 
 const App = () => {
   return (
-    <div className="mx-4 sm:mx-[1%]">
+    <div className="max-w-screen">
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -27,6 +30,10 @@ const App = () => {
         />
         <Route path="/toolsAndMaintainence" element={<ToolsAndMaintainence />} />
         <Route path="/tasks" element={<TaskPage />} />
+        <Route path="/expenses" element={<ExpensesHome/>} />
+        <Route path="/expensesAdd" element={<ExpenseForm/>} />
+        
+        
       </Routes>
       <Footer />
     </div>

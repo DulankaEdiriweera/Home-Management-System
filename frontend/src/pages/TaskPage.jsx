@@ -12,11 +12,11 @@ const TaskPage = () => {
     const [editTask, setEditTask] = useState(null);
     const [newTask, setNewTask] = useState({
         title: "",
-        category: "Cooking",
+        category: "",
         description: "",
         dueDate: "",
-        priority: "Low",
-        status: "Not Started",
+        priority: "",
+        status: "",
         completed: false,
     });
     const [taskCount, setTaskCount] = useState(5);
@@ -182,11 +182,11 @@ const TaskPage = () => {
             const response = await axios.post("http://localhost:4000/task", { ...newTask, createdAt: new Date() });
             setNewTask({
                 title: "",
-                category: "Cooking",
+                category: "",
                 description: "",
                 dueDate: "",
-                priority: "Low",
-                status: "Not Started",
+                priority: "",
+                status: "",
                 completed: false,
             });
             setShowAddForm(false);
@@ -267,11 +267,6 @@ const TaskPage = () => {
                 setLoading(false);
             }
         }
-    };
-
-    const loadMoreTasks = () => {
-        setLoading(true);
-        setTaskCount((prevCount) => prevCount + 5);
     };
 
     const formatDate = (dateString) => {
@@ -457,9 +452,9 @@ const TaskPage = () => {
                                         onChange={handleInputChange}
                                         className="w-full p-2 border rounded"
                                     >
+                                        <option value="">Select Category</option>
                                         <option value="Cooking">Cooking</option>
                                         <option value="Cleaning">Cleaning</option>
-                                        <option value="Study">Study</option>
                                         <option value="Work">Work</option>
                                         <option value="Billing">Billing</option>
                                         <option value="Other">Other</option>
@@ -499,6 +494,7 @@ const TaskPage = () => {
                                         onChange={handleInputChange}
                                         className="w-full p-2 border rounded"
                                     >
+                                        <option value="">Select Priority</option>
                                         <option value="Low">Low</option>
                                         <option value="Medium">Medium</option>
                                         <option value="High">High</option>
@@ -513,6 +509,7 @@ const TaskPage = () => {
                                         onChange={handleInputChange}
                                         className="w-full p-2 border rounded"
                                     >
+                                        <option value="">Select Status</option>
                                         <option value="Not Started">Not Started</option>
                                         <option value="In Progress">In Progress</option>
                                         <option value="Completed">Completed</option>
@@ -571,9 +568,9 @@ const TaskPage = () => {
                                         onChange={handleEditInputChange}
                                         className="w-full p-2 border rounded"
                                     >
+                                        <option value="">Select Category</option>
                                         <option value="Cooking">Cooking</option>
                                         <option value="Cleaning">Cleaning</option>
-                                        <option value="Study">Study</option>
                                         <option value="Work">Work</option>
                                         <option value="Billing">Billing</option>
                                         <option value="Other">Other</option>
@@ -613,6 +610,7 @@ const TaskPage = () => {
                                         onChange={handleEditInputChange}
                                         className="w-full p-2 border rounded"
                                     >
+                                        <option value="">Select Priority</option>
                                         <option value="Low">Low</option>
                                         <option value="Medium">Medium</option>
                                         <option value="High">High</option>
@@ -627,6 +625,7 @@ const TaskPage = () => {
                                         onChange={handleEditInputChange}
                                         className="w-full p-2 border rounded"
                                     >
+                                        <option value="">Select Status</option>
                                         <option value="Not Started">Not Started</option>
                                         <option value="In Progress">In Progress</option>
                                         <option value="Completed">Completed</option>
@@ -720,24 +719,6 @@ const TaskPage = () => {
                         </div>
                     )}
                 </div>
-
-                {filteredTasks.length > 0 && filteredTasks.length < tasks.length && (
-                    <div className="flex justify-center mt-5">
-                        <p className="text-gray-500">Filtered view - Load More not available</p>
-                    </div>
-                )}
-
-                {filteredTasks.length === tasks.length && (
-                    <div className="flex justify-center mt-5">
-                        <button
-                            onClick={loadMoreTasks}
-                            disabled={loading}
-                            className={`bg-blue-500 text-white px-4 py-2 rounded ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
-                        >
-                            {loading ? "Loading..." : "Load More Tasks"}
-                        </button>
-                    </div>
-                )}
             </div>
         </div>
     );

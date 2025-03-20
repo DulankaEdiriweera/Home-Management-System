@@ -34,7 +34,7 @@ const SideBarInventory = () => {
           <SidebarItem
             to="/furnitureAndElectronics"
             icon={<MdChair />}
-            label="Furniture & Electronics Items"
+            label="Household Items"
           />
           <SidebarItem
             to="/toolsAndMaintainence"

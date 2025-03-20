@@ -16,7 +16,7 @@ import ExpenseForm from "./pages/ExpensesForm";
 
 const App = () => {
   return (
-    <div className="mx-4 sm:mx-[1%]">
+    <div className="max-w-screen">
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />

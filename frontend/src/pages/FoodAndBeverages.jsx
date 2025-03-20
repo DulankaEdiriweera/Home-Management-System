@@ -260,17 +260,17 @@ const FoodAndBeverages = () => {
   // Download PDF
   const handleExportPDF = () => {
     const doc = new jsPDF();
-  
+
     // Add title with style
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
     doc.text("Food & Beverages Inventory Report", 14, 20);
-  
+
     // Add space after the title
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
     doc.text("Generated on: " + new Date().toLocaleDateString(), 14, 28);
-  
+
     // Group items by category
     const categoryData = {};
     filteredItems.forEach((item) => {
@@ -279,9 +279,9 @@ const FoodAndBeverages = () => {
       }
       categoryData[item.category].push(item);
     });
-  
+
     let startY = 40; // Start position for tables
-  
+
     // Loop through categories
     Object.entries(categoryData).forEach(([category, items]) => {
       // Category header
@@ -289,14 +289,22 @@ const FoodAndBeverages = () => {
       doc.setFont("helvetica", "bold");
       doc.text(category, 14, startY); // Category Title
       startY += 8; // Move down
-  
+
       // Table header with style
       doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
       const tableHeader = [
-        ["Item Name", "Quantity","Weight / Volume", "Unit", "Expiry Date", "Storage Location", "Minimum Level"],
+        [
+          "Item Name",
+          "Quantity",
+          "Weight / Volume",
+          "Unit",
+          "Expiry Date",
+          "Storage Location",
+          "Minimum Level",
+        ],
       ];
-  
+
       // Table data
       const tableData = items.map((item) => [
         item.itemName,
@@ -309,34 +317,33 @@ const FoodAndBeverages = () => {
         item.storageTypeLocation || "N/A",
         item.minimumLevel,
       ]);
-  
+
       // Add table
       autoTable(doc, {
         startY,
         head: tableHeader,
         body: tableData,
-        theme: 'grid', // Add grid theme
-        headStyles: { fillColor: [59, 130, 246], textColor: [255, 255, 255] },  // Header background color
+        theme: "grid", // Add grid theme
+        headStyles: { fillColor: [59, 130, 246], textColor: [255, 255, 255] }, // Header background color
         bodyStyles: { fillColor: [240, 240, 240] }, // Body row background color
         styles: { fontSize: 10, cellPadding: 3, halign: "center" },
       });
-  
+
       // Update Y position for the next category
       startY = doc.lastAutoTable.finalY + 10;
-  
+
       // Total items in category
       doc.setFontSize(12);
       doc.setFont("helvetica", "bold");
       doc.text(`Total Items of ${category}: ${items.length}`, 14, startY);
-  
+
       // Add some spacing before the next category
       startY += 15;
     });
-  
+
     // Save the generated PDF
     doc.save("Food_Beverages_Inventory.pdf");
   };
-  
 
   // Define the getRowClassName function in the parent component
   const getRowClassName = (row) => {
@@ -345,18 +352,14 @@ const FoodAndBeverages = () => {
     const timeDiff = expiryDate - today;
     const daysToExpiry = timeDiff;
 
-    if ((row.quantity <= row.minimumLevel) && (daysToExpiry <= 3)) {
-      return "bg-gradient-to-r from-red-100 via-red-400 to-red-100";  
+    if (row.quantity <= row.minimumLevel && daysToExpiry <= 3) {
+      return "bg-gradient-to-r from-red-100 via-red-400 to-red-100";
     } else if (daysToExpiry <= 3) {
       return "bg-gradient-to-r from-red-100 via-red-500 to-red-100"; // Close to expiry
     } else if (row.quantity <= row.minimumLevel) {
       return "bg-gradient-to-r from-red-100 via-red-300 to-red-100"; // Low stock
     }
     return ""; // Default (no color)
-    
-    
-    
-    
   };
 
   return (
@@ -473,7 +476,8 @@ const FoodAndBeverages = () => {
                     </button>
                   ),
                 }))}
-                getRowClassName={getRowClassName}/>
+                getRowClassName={getRowClassName}
+              />
             </div>
           )}
         </div>

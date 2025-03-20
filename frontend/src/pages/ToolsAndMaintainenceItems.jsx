@@ -247,7 +247,7 @@ const ToolsAndMaintainenceItems = () => {
       {/* Main Content */}
 
       <div className="flex-1 p-6 bg-gray-200 h-screen rounded-2xl ml-4">
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-3xl font-bold text-gray-900 pl-5">
           TOOLS & MAINTAINENCE ITEMS
         </h1>
         {/* Action Buttons and Search Box */}

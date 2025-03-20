@@ -185,11 +185,10 @@ const ExpenseTracker = () => {
     }).format(amount);
   };
 
-  // Filter expenses based on search query and month
+  // Filter expenses based on search query (category only) and month
   const filteredExpenses = expenses.filter((expense) => 
     (searchQuery === "" || 
-     expense.category.toLowerCase().includes(searchQuery.toLowerCase()) || 
-     expense.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
+     expense.category.toLowerCase().includes(searchQuery.toLowerCase())) &&
     (searchMonth === "" || expense.month === searchMonth)
   );
 
@@ -217,7 +216,7 @@ const ExpenseTracker = () => {
           h1 { text-align: center; }
           table { width: 100%; border-collapse: collapse; margin-top: 20px; }
           th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-          th { background-color: #f2f2f2; }
+          th { background-color: #7CB9E8; }
           .total-row { font-weight: bold; background-color: #f2f2f2; }
           .no-print { margin-top: 20px; text-align: center; }
           @media print {
@@ -295,7 +294,7 @@ const ExpenseTracker = () => {
           <div className="flex gap-2">
             <input
               type="text"
-              placeholder="Search by category or description..."
+              placeholder="Search by category..."
               className="border px-3 py-2 rounded-lg"
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -336,7 +335,7 @@ const ExpenseTracker = () => {
       <div className="overflow-x-auto" ref={printRef}>
         <table className="w-full border border-gray-300 text-center rounded-lg overflow-hidden">
           <thead>
-            <tr className="bg-gray-100 text-gray-700">
+            <tr style={{ backgroundColor: "#7CB9E8" }} className="text-gray-700">
               {[ "Month", "Date", "Category", "Payment Method", "Description","Amount","Actions"].map((head) => (
                 <th key={head} className="border p-3">{head}</th>
               ))}
@@ -375,8 +374,8 @@ const ExpenseTracker = () => {
                   </tr>
                 ))}
                 <tr className="bg-gray-100 border-t">
-                  <td className="p-3 font-bold">{formatAsLKR(totalAmount)}</td>
-                  <td colSpan="6" className="p-3 text-left font-bold">Total</td>
+                  <td className="p-3 font-bold">Total = {formatAsLKR(totalAmount)}</td>
+                  <td colSpan="6" className="p-3 text-left font-bold"></td>
                 </tr>
               </>
             )}
@@ -515,8 +514,6 @@ const ExpenseTracker = () => {
       )}
 
         </div>
-      {/* Header */}
-      
     </div>
   );
 };

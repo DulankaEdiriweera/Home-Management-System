@@ -69,9 +69,9 @@ const Header = () => {
           </li>
           <li>
             <Link
-              to="/expensesAdd"
+              to="/expenses"
               className={`font-medium hover:text-blue-500 cursor-pointer transition-colors pb-1 ${
-                currentPath === "/expensesAdd"
+                currentPath === "/expenses"
                   ? "border-b-2 border-blue-500 text-blue-500"
                   : ""
               }`}

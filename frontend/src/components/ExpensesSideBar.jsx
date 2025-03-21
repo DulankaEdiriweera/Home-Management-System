@@ -16,28 +16,24 @@ const ExpenseSideBar = ({ onSelectionChange }) => {
             <div className="flex flex-col space-y-4">
             <Link
                     className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Expenses Home' ? 'bg-blue-700' : 'bg-gray-700'}`}
-                    to="/expensesAdd"
+                    to="/expenses"
                 >
                     Expenses Home
                 </Link>
-                <button 
-                    className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Expenses' ? 'bg-blue-700' : 'bg-gray-700'}`} 
-                    
-                >
-                    Expenses
-                </button>
                 <Link
-                    className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Monthly Budget' ? 'bg-blue-700' : 'bg-gray-700'}`}
+                    className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Expenses Home' ? 'bg-blue-700' : 'bg-gray-700'}`}
+                    to="/expensesAdd"
+                >
+                    View Expenses 
+                </Link>
+                
+                <Link
+                    className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Expenses Home' ? 'bg-blue-700' : 'bg-gray-700'}`}
                     to="/monthlyBudget"
                 >
                     Monthly Budget
                 </Link>
-                <button 
-                    className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Expense Overview' ? 'bg-blue-700' : 'bg-gray-700'}`} 
-                    
-                >
-                    Expense Overview
-                </button>
+                
             </div>
         </div>
     );

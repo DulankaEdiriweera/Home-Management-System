@@ -17,6 +17,8 @@ import MonthlyBudget from "./pages/MonthlyBudgetPage";
 import ShoppingList from "./pages/shoppingList";
 import AddItem from "./pages/AddItem";
 import RecipeGenerator from "./pages/RecipeGenerator";
+import SignUp from "./pages/SignUp";
+import Login from "./pages/Login";
 
 const App = () => {
   return (
@@ -42,6 +44,10 @@ const App = () => {
         <Route path="/add-item" element={<AddItem />} /> {/* New Route */}
         <Route path="/recipe-suggestions" element={<RecipeGenerator />} />
 
+
+        <Route path="/signUp" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
+        
       </Routes>
       <Footer />
     </div>

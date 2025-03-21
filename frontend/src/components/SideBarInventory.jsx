@@ -6,6 +6,7 @@ import { TbHandSanitizer } from "react-icons/tb";
 import { GiMedicinePills } from "react-icons/gi";
 import { MdChair } from "react-icons/md";
 import { FaTools } from "react-icons/fa";
+import { GiHotMeal } from "react-icons/gi";
 
 const SideBarInventory = () => {
   return (
@@ -40,6 +41,11 @@ const SideBarInventory = () => {
             to="/toolsAndMaintainence"
             icon={<FaTools />}
             label="Tools & Maintainence Items"
+          />
+           <SidebarItem
+            to="/recipe-suggestions"
+            icon={<GiHotMeal />}
+            label="Recipe Suggestor"
           />
         </div>
       </div>

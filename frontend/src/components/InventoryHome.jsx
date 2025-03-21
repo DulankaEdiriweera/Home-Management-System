@@ -13,7 +13,7 @@ const InventoryHome = () => {
       {/* Sidebar */}
       <SideBarInventory />
       {/* Main Content */}
-      <div className="flex-1 p-6 bg-gray-200 h-screen rounded-2xl ml-4">
+      <div className="flex-1 p-6 bg-gray-200 h-screen rounded-2xl ml-2">
         {/* Heading */}
         <h1 className="text-3xl font-semibold text-gray-700 text-center pt-10">
           "Know what you have, use what you need, save what matters."

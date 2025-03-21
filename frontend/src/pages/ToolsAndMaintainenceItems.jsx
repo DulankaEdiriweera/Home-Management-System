@@ -8,6 +8,7 @@ import ReusablePopUp from "../components/ReusablePopUp";
 import ReusableForm from "../components/ReusableForm";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import Swal from "sweetalert2";
 
 const ToolsAndMaintainenceItems = () => {
   const navigate = useNavigate();
@@ -108,15 +109,30 @@ const ToolsAndMaintainenceItems = () => {
 
       // Check if the response status is success before showing success message
       if (response.status >= 200 && response.status < 300) {
-        alert(response.data.message); // Success message
-        setIsModalOpen(false); // Close modal
-        window.location.reload(); // Reload the page to fetch updated data
+        Swal.fire({
+          title: "Success!",
+          text: response.data.message,
+          icon: "success",
+          timer: 2000,
+          showConfirmButton: false,
+        }).then(() => {
+          setIsModalOpen(false); // Close modal
+          window.location.reload(); // Reload the page to fetch updated data
+        });
       } else {
-        alert("Unexpected response from server.");
+        Swal.fire({
+          title: "Unexpected Response",
+          text: "Unexpected response from server.",
+          icon: "warning",
+        });
       }
     } catch (error) {
       console.error("Error details:", error);
-      alert(error.response?.data?.message || "Error saving item");
+      Swal.fire({
+        title: "Error!",
+        text: error.response?.data?.message || "Error saving item",
+        icon: "error",
+      });
       setIsModalOpen(false);
     }
   };
@@ -155,17 +171,41 @@ const ToolsAndMaintainenceItems = () => {
 
   // Delete an Item
   const handleDeleteClick = async (itemId) => {
-    if (window.confirm("Are you sure you want to delete this item?")) {
-      try {
-        await axios.delete(
-          `http://localhost:4000/inventory/toolItems/${itemId}`
-        );
-        settoolItems(toolItems.filter((item) => item._id !== itemId)); // Update the UI to reflect deletion
-        alert("Item deleted successfully.");
-      } catch (err) {
-        setError("Error deleting item");
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This action cannot be undone!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await axios.delete(
+            `http://localhost:4000/inventory/toolItems/${itemId}`
+          );
+
+          settoolItems(toolItems.filter((item) => item._id !== itemId));
+
+          Swal.fire({
+            title: "Deleted!",
+            text: "The item has been successfully removed.",
+            icon: "success",
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        } catch (err) {
+          setError("Error deleting item");
+
+          Swal.fire({
+            title: "Error!",
+            text: "Failed to delete the item. Please try again.",
+            icon: "error",
+          });
+        }
       }
-    }
+    });
   };
 
   // Download PDF
@@ -246,7 +286,7 @@ const ToolsAndMaintainenceItems = () => {
       <SideBarInventory />
       {/* Main Content */}
 
-      <div className="flex-1 p-6 bg-gray-200 h-screen rounded-2xl ml-4">
+      <div className="flex-1 p-6 bg-gray-200 h-screen rounded-2xl ml-2">
         <h1 className="text-3xl font-bold text-gray-900 pl-5">
           TOOLS & MAINTAINENCE ITEMS
         </h1>

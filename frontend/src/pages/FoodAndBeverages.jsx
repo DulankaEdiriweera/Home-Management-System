@@ -207,6 +207,7 @@ const FoodAndBeverages = () => {
         "Vegetables",
         "Fruits",
         "Grains",
+        "Condiments"
       ],
     },
     {
@@ -614,6 +615,7 @@ const FoodAndBeverages = () => {
                   "Vegetables",
                   "Fruits",
                   "Grains",
+                  "Condiments"
                 ],
               },
               {

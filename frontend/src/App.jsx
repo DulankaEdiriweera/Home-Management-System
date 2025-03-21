@@ -16,6 +16,8 @@ import MonthlyBudget from "./pages/MonthlyBudgetPage";
 
 import ShoppingList from "./pages/shoppingList";
 import AddItem from "./pages/AddItem";
+import SignUp from "./pages/SignUp";
+import Login from "./pages/Login";
 
 const App = () => {
   return (
@@ -39,6 +41,9 @@ const App = () => {
         
         <Route path='/shoppingList' element={<ShoppingList/>}/>
         <Route path="/add-item" element={<AddItem />} /> {/* New Route */}
+
+        <Route path="/signUp" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
         
       </Routes>
       <Footer />

@@ -24,7 +24,7 @@ export default function BudgetPage() {
     <div className="flex p-2">
       <ExpenseSideBar/>
 
-      <div className="flex-1 p-6 bg-gray-200 h-screen rounded-2xl ml-4"> 
+      <div className="flex-1 p-6 bg-gray-200 h-screen rounded-2xl ml-2"> 
       <div className="max-w-md mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
         <div className="bg-gradient-to-r from-blue-500 to-indigo-600 py-6">
           <h1 className="text-center text-2xl font-bold text-white">Monthly Budget Tracker</h1>

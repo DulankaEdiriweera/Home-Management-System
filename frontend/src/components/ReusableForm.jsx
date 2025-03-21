@@ -24,33 +24,45 @@ const ReusableForm = ({ fields, onSubmit, onCancel, readOnly }) => {
     }
   };
 
-  // Define the validation schema using Yup
   const validationSchema = Yup.object(
     fields.reduce((acc, field) => {
       if (field.required) {
-        acc[field.name] = Yup.string()
-          .required(`${field.label} is required`)
-          .positive(`${field.label} must be a positive number`)
-          .min(1, `${field.label} must be at least 1 character`);
+        acc[field.name] = Yup.string().required(`${field.label} is required.`);
       }
       if (field.type === "text") {
-        acc[field.name] = Yup.string()
-          .required(`${field.label} is required`)
+        acc[field.name] = Yup.string().required(`Please enter ${field.label}.`);
       }
       if (field.type === "number") {
-        acc[field.name] = Yup.number()
-          .required(`${field.label} is required`)
-          .min(1, `${field.label} must be greater than 0`);
+        acc[field.name] = Yup.string()
+          .required(`${field.label} is required.`)
+          .test("is-valid-number", "Please enter a valid number.", (value) =>
+            value ? !isNaN(Number(value)) : false
+          )
+          .test("min-value", `${field.label} must be at least 1.`, (value) =>
+            value ? Number(value) >= 1 : false
+          );
       }
       if (field.type === "select") {
         acc[field.name] = Yup.string()
-          .required(`${field.label} is required`)
-          .notOneOf([""], `${field.label} must be selected`);
+          .required(`Please select ${field.label}.`)
+          .notOneOf([""], `Please choose a valid ${field.label}.`);
       }
       if (field.name === "expiryDate") {
-        acc[field.name] = Yup.date()
-          .required("Expiry Date is required")
-          .min(new Date(), "Expiry date cannot be in the past");
+        acc[field.name] = Yup.string()
+          .required("Please enter an expiry date.")
+          .nullable() // Allows empty values to be properly validated
+          .test("valid-date", "Please enter a valid date.", (value) => {
+            if (!value) return false; // Triggers required message first
+            return !isNaN(Date.parse(value));
+          })
+          .test(
+            "future-date",
+            "Expiry date cannot be in the past.",
+            (value) => {
+              if (!value) return true; // Avoids showing this error when field is empty
+              return new Date(value) >= new Date();
+            }
+          );
       }
       return acc;
     }, {})
@@ -74,7 +86,7 @@ const ReusableForm = ({ fields, onSubmit, onCancel, readOnly }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!readOnly && await validate()) {
+    if (!readOnly && (await validate())) {
       onSubmit(formData); // Only submit if not in read-only mode and validation passes
     }
   };
@@ -102,8 +114,7 @@ const ReusableForm = ({ fields, onSubmit, onCancel, readOnly }) => {
                   </option>
                 ))}
               </select>
-            ) : 
-            field.name === "expiryDate" ? (
+            ) : field.name === "expiryDate" ? (
               <input
                 type="date"
                 name={field.name}

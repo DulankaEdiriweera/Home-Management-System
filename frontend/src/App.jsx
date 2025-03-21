@@ -16,6 +16,7 @@ import MonthlyBudget from "./pages/MonthlyBudgetPage";
 
 import ShoppingList from "./pages/shoppingList";
 import AddItem from "./pages/AddItem";
+import RecipeGenerator from "./pages/RecipeGenerator";
 
 const App = () => {
   return (
@@ -33,13 +34,14 @@ const App = () => {
         />
         <Route path="/toolsAndMaintainence" element={<ToolsAndMaintainence />} />
         <Route path="/tasks" element={<TaskPage />} />
-        <Route path="/expenses" element={<ExpensesHome/>} />
-        <Route path="/expensesAdd" element={<ExpenseForm/>} />
+        <Route path="/expenses" element={<ExpensesHome />} />
+        <Route path="/expensesAdd" element={<ExpenseForm />} />
         <Route path="/monthlyBudget" element={<MonthlyBudget />} />
-        
-        <Route path='/shoppingList' element={<ShoppingList/>}/>
+
+        <Route path='/shoppingList' element={<ShoppingList />} />
         <Route path="/add-item" element={<AddItem />} /> {/* New Route */}
-        
+        <Route path="/recipe-suggestions" element={<RecipeGenerator />} />
+
       </Routes>
       <Footer />
     </div>

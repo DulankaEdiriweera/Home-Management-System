@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import MiniSideBar_Task from "../components/MiniSideBar_Task";
 import axios from "axios";
+import Swal from "sweetalert2";
 
 const TaskPage = () => {
     const [tasks, setTasks] = useState([]);
@@ -29,8 +30,12 @@ const TaskPage = () => {
     });
     const [formErrors, setFormErrors] = useState({
         title: "",
+        category: "",
         description: "",
         dueDate: "",
+        priority: "",
+        status: "",
+
     });
 
     // Calculate today's date for min attribute on date input
@@ -109,6 +114,18 @@ const TaskPage = () => {
 
         if (!task.dueDate) {
             errors.dueDate = "Due date is required";
+        }
+
+        if (!task.category) {
+            errors.category = "Category is required";
+        }
+
+        if (!task.priority) {
+            errors.priority = "Priority is required";
+        }
+
+        if (!task.status) {
+            errors.status = "Status is required";
         }
 
         // Return both the errors and whether the form is valid
@@ -194,15 +211,20 @@ const TaskPage = () => {
             // Fetch all tasks again to ensure we have the most up-to-date data
             await fetchTasks();
 
-            setMessage("Task added successfully!");
-            setTimeout(() => {
-                setMessage("");
-            }, 3000);
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Task added successfully!',
+                timer: 2000,
+                showConfirmButton: false
+            });
         } catch (err) {
-            setError("Failed to add task");
-            setTimeout(() => {
-                setError("");
-            }, 3000);
+
+            Swal.fire({
+                title: "Error!",
+                text: "Failed to add the task.",
+                icon: "error",
+            });
         } finally {
             setLoading(false);
         }
@@ -230,23 +252,36 @@ const TaskPage = () => {
             // Fetch all tasks again to ensure we have the most up-to-date data
             await fetchTasks();
 
-            setMessage("Task updated successfully!");
-            setTimeout(() => {
-                setMessage("");
-            }, 3000);
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: 'Task updated successfully!',
+                timer: 2000,
+                showConfirmButton: false
+            });
         } catch (err) {
             setError("Failed to update task");
-            setTimeout(() => {
-                setError("");
-            }, 3000);
+            Swal.fire({
+                title: "Error!",
+                text: "Failed to update the task.",
+                icon: "error",
+            });
         } finally {
             setLoading(false);
         }
     };
 
     const handleDeleteTask = async (taskId) => {
-        const confirmDelete = window.confirm("Do you want to delete this task?");
-        if (confirmDelete) {
+        const { isConfirmed } = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            cancelButtonColor: '#d33',
+            confirmButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!'
+        });
+        if (isConfirmed) {
             try {
                 setLoading(true);
                 await axios.delete(`http://localhost:4000/task/${taskId}`);
@@ -254,15 +289,20 @@ const TaskPage = () => {
                 // Fetch all tasks again to ensure we have the most up-to-date data
                 await fetchTasks();
 
-                setMessage("Task deleted successfully!");
-                setTimeout(() => {
-                    setMessage("");
-                }, 3000);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Task deleted successfully!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             } catch (err) {
                 setError("Failed to delete task");
-                setTimeout(() => {
-                    setError("");
-                }, 3000);
+                Swal.fire({
+                    title: "Error!",
+                    text: "Failed to delete the task.",
+                    icon: "error",
+                });
             } finally {
                 setLoading(false);
             }
@@ -450,15 +490,16 @@ const TaskPage = () => {
                                         name="category"
                                         value={newTask.category}
                                         onChange={handleInputChange}
-                                        className="w-full p-2 border rounded"
+                                        className={`w-full p-2 border rounded ${formErrors.category ? 'border-red-500' : ''}`}
                                     >
-                                        <option value="">Select Category</option>
+                                        <option value=""></option>
                                         <option value="Cooking">Cooking</option>
                                         <option value="Cleaning">Cleaning</option>
                                         <option value="Work">Work</option>
                                         <option value="Billing">Billing</option>
                                         <option value="Other">Other</option>
                                     </select>
+                                    {formErrors.category && <p className="text-red-500 text-sm mt-1">{formErrors.category}</p>}
                                 </div>
 
                                 <div className="mb-3">
@@ -492,13 +533,14 @@ const TaskPage = () => {
                                         name="priority"
                                         value={newTask.priority}
                                         onChange={handleInputChange}
-                                        className="w-full p-2 border rounded"
+                                        className={`w-full p-2 border rounded ${formErrors.priority ? 'border-red-500' : ''}`}
                                     >
-                                        <option value="">Select Priority</option>
+                                        <option value=""></option>
                                         <option value="Low">Low</option>
                                         <option value="Medium">Medium</option>
                                         <option value="High">High</option>
                                     </select>
+                                    {formErrors.priority && <p className="text-red-500 text-sm mt-1">{formErrors.priority}</p>}
                                 </div>
 
                                 <div className="mb-3">
@@ -507,13 +549,14 @@ const TaskPage = () => {
                                         name="status"
                                         value={newTask.status}
                                         onChange={handleInputChange}
-                                        className="w-full p-2 border rounded"
+                                        className={`w-full p-2 border rounded ${formErrors.status ? 'border-red-500' : ''}`}
                                     >
-                                        <option value="">Select Status</option>
+                                        <option value=""></option>
                                         <option value="Not Started">Not Started</option>
                                         <option value="In Progress">In Progress</option>
                                         <option value="Completed">Completed</option>
                                     </select>
+                                    {formErrors.status && <p className="text-red-500 text-sm mt-1">{formErrors.status}</p>}
                                 </div>
 
                                 {/* Buttons */}
@@ -566,15 +609,16 @@ const TaskPage = () => {
                                         name="category"
                                         value={editTask?.category || ''}
                                         onChange={handleEditInputChange}
-                                        className="w-full p-2 border rounded"
+                                        className={`w-full p-2 border rounded ${formErrors.category ? 'border-red-500' : ''}`}
                                     >
-                                        <option value="">Select Category</option>
+                                        <option value=""></option>
                                         <option value="Cooking">Cooking</option>
                                         <option value="Cleaning">Cleaning</option>
                                         <option value="Work">Work</option>
                                         <option value="Billing">Billing</option>
                                         <option value="Other">Other</option>
                                     </select>
+                                    {formErrors.category && <p className="text-red-500 text-sm mt-1">{formErrors.category}</p>}
                                 </div>
 
                                 <div className="mb-3">
@@ -608,13 +652,14 @@ const TaskPage = () => {
                                         name="priority"
                                         value={editTask?.priority || ''}
                                         onChange={handleEditInputChange}
-                                        className="w-full p-2 border rounded"
+                                        className={`w-full p-2 border rounded ${formErrors.priority ? 'border-red-500' : ''}`}
                                     >
-                                        <option value="">Select Priority</option>
+                                        <option value=""></option>
                                         <option value="Low">Low</option>
                                         <option value="Medium">Medium</option>
                                         <option value="High">High</option>
                                     </select>
+                                    {formErrors.priority && <p className="text-red-500 text-sm mt-1">{formErrors.priority}</p>}
                                 </div>
 
                                 <div className="mb-3">
@@ -623,13 +668,14 @@ const TaskPage = () => {
                                         name="status"
                                         value={editTask?.status || ''}
                                         onChange={handleEditInputChange}
-                                        className="w-full p-2 border rounded"
+                                        className={`w-full p-2 border rounded ${formErrors.status ? 'border-red-500' : ''}`}
                                     >
-                                        <option value="">Select Status</option>
+                                        <option value=""></option>
                                         <option value="Not Started">Not Started</option>
                                         <option value="In Progress">In Progress</option>
                                         <option value="Completed">Completed</option>
                                     </select>
+                                    {formErrors.status && <p className="text-red-500 text-sm mt-1">{formErrors.status}</p>}
                                 </div>
 
                                 {/* Buttons */}

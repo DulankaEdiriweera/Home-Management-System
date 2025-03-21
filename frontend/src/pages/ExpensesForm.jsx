@@ -184,7 +184,7 @@ const ExpenseTracker = () => {
 
   // Format number as LKR
   const formatAsLKR = (amount) => {
-    return new Intl.NumberFormat('si-LK', {
+    return new Intl.NumberFormat('LK', {
       style: 'currency',
       currency: 'LKR',
       minimumFractionDigits: 2
@@ -293,7 +293,7 @@ const ExpenseTracker = () => {
   return (
     <div className="flex p-2">
         <ExpenseSideBar/>
-        <div className="flex-1 p-6 bg-gray-200 h-screen rounded-2xl ml-4">
+        <div className="flex-1 p-6 bg-gray-200 h-screen rounded-2xl ml-2">
         <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Expense Tracker</h2>
         <div className="flex gap-4">

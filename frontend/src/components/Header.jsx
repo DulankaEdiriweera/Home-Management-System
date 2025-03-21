@@ -1,7 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 const Header = () => {
+  // Get current location from React Router
+  const location = useLocation();
+  const currentPath = location.pathname;
+
   return (
     <header className="flex justify-between items-center py-5 px-8 bg-white shadow-md">
       {/* Logo */}
@@ -23,22 +27,38 @@ const Header = () => {
       <nav>
         <ul className="flex space-x-20">
           <li>
-            <Link to="/inventoryHome" className="font-medium hover:text-blue-500 cursor-pointer transition-colors">
+            <Link
+              to="/inventoryHome"
+              className={`font-medium hover:text-blue-500 cursor-pointer transition-colors pb-1 ${currentPath === '/inventoryHome' ? 'border-b-2 border-blue-500 text-blue-500' : ''
+                }`}
+            >
               INVENTORY
             </Link>
           </li>
           <li>
-            <Link to="/tasks" className="font-medium hover:text-blue-500 cursor-pointer transition-colors">
+            <Link
+              to="/tasks"
+              className={`font-medium hover:text-blue-500 cursor-pointer transition-colors pb-1 ${currentPath === '/tasks' ? 'border-b-2 border-blue-500 text-blue-500' : ''
+                }`}
+            >
               TASK MASTER
             </Link>
           </li>
           <li>
-            <Link to="/expenses" className="font-medium hover:text-blue-500 cursor-pointer transition-colors">
+            <Link
+              to="/expenses"
+              className={`font-medium hover:text-blue-500 cursor-pointer transition-colors pb-1 ${currentPath === '/expenses' ? 'border-b-2 border-blue-500 text-blue-500' : ''
+                }`}
+            >
               EXPENSES TRACKER
             </Link>
           </li>
           <li>
-            <Link to="/shopping-list" className="font-medium hover:text-blue-500 cursor-pointer transition-colors">
+            <Link
+              to="/shopping-list"
+              className={`font-medium hover:text-blue-500 cursor-pointer transition-colors pb-1 ${currentPath === '/shopping-list' ? 'border-b-2 border-blue-500 text-blue-500' : ''
+                }`}
+            >
               SHOPPING LIST
             </Link>
           </li>

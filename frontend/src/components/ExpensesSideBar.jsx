@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState  } from 'react';
+import { Link } from 'react-router-dom';
 
 const ExpenseSideBar = ({ onSelectionChange }) => {
     const [selectedOption, setSelectedOption] = useState('Expenses Home');
@@ -13,27 +14,27 @@ const ExpenseSideBar = ({ onSelectionChange }) => {
             <h2 className="text-2xl font-semibold mb-6">Expense Menu</h2>
 
             <div className="flex flex-col space-y-4">
-                <button 
-                    className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Expenses Home' ? 'bg-blue-700' : 'bg-gray-700'}`} 
-                    onClick={() => handleOptionChange('Expenses Home')}
+            <Link
+                    className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Expenses Home' ? 'bg-blue-700' : 'bg-gray-700'}`}
+                    to="/expensesAdd"
                 >
                     Expenses Home
-                </button>
+                </Link>
                 <button 
                     className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Expenses' ? 'bg-blue-700' : 'bg-gray-700'}`} 
-                    onClick={() => handleOptionChange('Expenses')}
+                    
                 >
                     Expenses
                 </button>
-                <button 
-                    className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Monthly Budget' ? 'bg-blue-700' : 'bg-gray-700'}`} 
-                    onClick={() => handleOptionChange('Monthly Budget')}
+                <Link
+                    className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Monthly Budget' ? 'bg-blue-700' : 'bg-gray-700'}`}
+                    to="/monthlyBudget"
                 >
                     Monthly Budget
-                </button>
+                </Link>
                 <button 
                     className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Expense Overview' ? 'bg-blue-700' : 'bg-gray-700'}`} 
-                    onClick={() => handleOptionChange('Expense Overview')}
+                    
                 >
                     Expense Overview
                 </button>

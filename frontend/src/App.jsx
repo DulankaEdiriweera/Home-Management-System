@@ -12,7 +12,10 @@ import ToolsAndMaintainence from "./pages/ToolsAndMaintainenceItems"
 import TaskPage from "./pages/TaskPage";
 import ExpensesHome from "./pages/ExpensesHome";
 import ExpenseForm from "./pages/ExpensesForm";
+import MonthlyBudget from "./pages/MonthlyBudgetPage";
 
+import ShoppingList from "./pages/shoppingList";
+import AddItem from "./pages/AddItem";
 
 const App = () => {
   return (
@@ -32,7 +35,10 @@ const App = () => {
         <Route path="/tasks" element={<TaskPage />} />
         <Route path="/expenses" element={<ExpensesHome/>} />
         <Route path="/expensesAdd" element={<ExpenseForm/>} />
+        <Route path="/monthlyBudget" element={<MonthlyBudget />} />
         
+        <Route path='/shoppingList' element={<ShoppingList/>}/>
+        <Route path="/add-item" element={<AddItem />} /> {/* New Route */}
         
       </Routes>
       <Footer />

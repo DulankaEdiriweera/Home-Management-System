@@ -7,6 +7,11 @@ const expensesSchema = new mongoose.Schema(
         required:true,
     },
 
+    month:{
+        type: String,
+        required:true,
+    },
+
     date:{
         type: Date,
         required:true,
@@ -25,11 +30,7 @@ const expensesSchema = new mongoose.Schema(
         type: String,
         required:true,
     },
-    image:{
-        type: String,
-        
-    },
-
+    
 },
 );
 

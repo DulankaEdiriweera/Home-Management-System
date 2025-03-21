@@ -46,16 +46,13 @@ const Header = () => {
           </li>
           <li>
             <Link
-              to="/expenses"
-              className={`font-medium hover:text-blue-500 cursor-pointer transition-colors pb-1 ${currentPath === '/expenses' ? 'border-b-2 border-blue-500 text-blue-500' : ''
-                }`}
-            >
+              to="/expensesAdd" className={`font-medium hover:text-blue-500 cursor-pointer transition-colors pb-1 ${currentPath === '/expenses' ? 'border-b-2 border-blue-500 text-blue-500' : ''
+                }`}>
               EXPENSES TRACKER
             </Link>
           </li>
           <li>
-            <Link
-              to="/shopping-list"
+            <Link to="/shoppingList"
               className={`font-medium hover:text-blue-500 cursor-pointer transition-colors pb-1 ${currentPath === '/shopping-list' ? 'border-b-2 border-blue-500 text-blue-500' : ''
                 }`}
             >

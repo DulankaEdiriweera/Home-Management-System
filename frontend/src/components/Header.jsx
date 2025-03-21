@@ -33,7 +33,7 @@ const Header = () => {
             </Link>
           </li>
           <li>
-            <Link to="/expensesAdd" className="font-medium hover:text-blue-500 cursor-pointer transition-colors">
+            <Link to="/expenses" className="font-medium hover:text-blue-500 cursor-pointer transition-colors">
               EXPENSES TRACKER
             </Link>
           </li>

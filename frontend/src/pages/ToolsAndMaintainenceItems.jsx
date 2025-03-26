@@ -32,13 +32,29 @@ const ToolsAndMaintainenceItems = () => {
   useEffect(() => {
     const fetchToolItems = async () => {
       try {
+        const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://localhost:4000/inventory/toolItems"
+          "http://localhost:4000/inventory/toolItems",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+            },
+          }
         );
 
         settoolItems(response.data);
       } catch (err) {
-        setError(err.response?.data?.message || "Error fetching data");
+        if (err.response && err.response.status === 401) {
+          Swal.fire({
+            title: "Unauthorized",
+            text: "You are not authorized to access this resource. Please log in.",
+            icon: "error",
+          }).then(() => {
+            navigate("/login"); // Redirect to login page
+          });
+        } else {
+          setError(err.response?.data?.message || "Error fetching data");
+        }
       } finally {
         setLoading(false);
       }
@@ -90,6 +106,15 @@ const ToolsAndMaintainenceItems = () => {
   ];
 
   const handleSubmit = async (data) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      Swal.fire({
+        title: "Unauthorized!",
+        text: "You are not logged in. Please log in to continue.",
+        icon: "error",
+      });
+      return; // Stop further execution if not authenticated
+    }
     try {
       let response;
 
@@ -97,13 +122,23 @@ const ToolsAndMaintainenceItems = () => {
         // If editing an item, make a PUT request to update the item
         response = await axios.put(
           `http://localhost:4000/inventory/toolItems/${editItem._id}`,
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
       } else {
         // If adding a new item, make a POST request
         response = await axios.post(
           "http://localhost:4000/inventory/toolItems",
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
       }
 
@@ -143,8 +178,14 @@ const ToolsAndMaintainenceItems = () => {
 
   const handleViewClick = async (itemId) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:4000/inventory/toolItems/${itemId}`
+        `http://localhost:4000/inventory/toolItems/${itemId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+          },
+        }
       );
       setViewItem(response.data);
       setIsViewModalOpen(true);
@@ -159,8 +200,14 @@ const ToolsAndMaintainenceItems = () => {
 
   const handleEditClick = async (itemId) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:4000/inventory/toolItems/${itemId}`
+        `http://localhost:4000/inventory/toolItems/${itemId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       setEditItem(response.data); // Set the item details for editing
       setIsEditModalOpen(true); // Open the modal for editing
@@ -182,8 +229,14 @@ const ToolsAndMaintainenceItems = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
+          const token = localStorage.getItem("token");
           await axios.delete(
-            `http://localhost:4000/inventory/toolItems/${itemId}`
+            `http://localhost:4000/inventory/toolItems/${itemId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
           );
 
           settoolItems(toolItems.filter((item) => item._id !== itemId));

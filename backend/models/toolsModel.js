@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import users from "../models/userModel.js";
 
 const toolsAndMaintainenceItemsSchema = new mongoose.Schema(
   {
@@ -17,6 +18,11 @@ const toolsAndMaintainenceItemsSchema = new mongoose.Schema(
     storageTypeLocation: {
       type: String,
       required: true,
+    },
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users", // Reference to the 'users' collection
+      required: true, // Ensure this field is always provided
     },
   },
   { timestamps: true }

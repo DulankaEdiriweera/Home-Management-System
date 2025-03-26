@@ -6,13 +6,14 @@ import {
   getHouseholdItemById,
   updateHouseholdItemById,
 } from "../controllers/householdItemController.js";
+import AuthenticateUser from "../middlewares/AuthenticateUser.js";
 
 const router = express.Router();
 
-router.post("/", addHouseholdItem);
-router.get("/", getAllHouseholdItems);
-router.get("/:id", getHouseholdItemById);
-router.put("/:id", updateHouseholdItemById);
-router.delete("/:id", deleteHouseholdItemById);
+router.post("/", AuthenticateUser, addHouseholdItem);
+router.get("/", AuthenticateUser, getAllHouseholdItems);
+router.get("/:id",AuthenticateUser, getHouseholdItemById);
+router.put("/:id",AuthenticateUser, updateHouseholdItemById);
+router.delete("/:id",AuthenticateUser, deleteHouseholdItemById);
 
 export default router;

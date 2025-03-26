@@ -3,12 +3,14 @@ import householdItems from "../models/householdItemModel.js";
 // Add a new Household Item
 export const addHouseholdItem = async (req, res) => {
   try {
+    const userId = req.userId;
     // Check if an item with the same parameters already exists
     const existingItem = await householdItems.findOne({
       itemName: req.body.itemName,
       category: req.body.category,
       expiryDate: req.body.expiryDate,
       storageTypeLocation: req.body.storageTypeLocation,
+      user: userId,
     });
 
     if (existingItem) {
@@ -17,7 +19,10 @@ export const addHouseholdItem = async (req, res) => {
         .json({ message: "Item with the same parameters already exists" });
     }
 
-    const newItem = new householdItems(req.body);
+    const newItem = new householdItems({
+      ...req.body,
+      user: userId,
+    });
     const savedItem = await newItem.save();
     res
       .status(201)
@@ -32,7 +37,10 @@ export const addHouseholdItem = async (req, res) => {
 // Get all Household items
 export const getAllHouseholdItems = async (req, res) => {
   try {
-    const items = await householdItems.find().sort({ updatedAt: -1 });
+    const userId = req.userId;
+    const items = await householdItems
+      .find({ user: userId })
+      .sort({ updatedAt: -1 });
     res.status(200).json(items);
   } catch (error) {
     res
@@ -44,7 +52,12 @@ export const getAllHouseholdItems = async (req, res) => {
 // Get a Household item by ID
 export const getHouseholdItemById = async (req, res) => {
   try {
-    const item = await householdItems.findById(req.params.id);
+    const userId = req.userId;
+
+    const item = await householdItems.findOne({
+      _id: req.params.id,
+      user: userId, // Check if the item belongs to the user
+    });
 
     if (!item) {
       return res.status(404).json({ message: "Item not found" });
@@ -61,9 +74,11 @@ export const getHouseholdItemById = async (req, res) => {
 // Update a Household item by ID
 export const updateHouseholdItemById = async (req, res) => {
   try {
+    const userId = req.userId;
+
     // Find the item by ID and update it with the new data from the request body
-    const updatedItem = await householdItems.findByIdAndUpdate(
-      req.params.id,
+    const updatedItem = await householdItems.findOneAndUpdate(
+      { _id: req.params.id, user: userId }, // Ensure the item belongs to the user
       req.body,
       { new: true }
     );
@@ -85,7 +100,12 @@ export const updateHouseholdItemById = async (req, res) => {
 // Delete a Household item by ID
 export const deleteHouseholdItemById = async (req, res) => {
   try {
-    const deletedItem = await householdItems.findByIdAndDelete(req.params.id);
+    const userId = req.userId;
+
+    const deletedItem = await householdItems.findOneAndDelete({
+      _id: req.params.id,
+      user: userId, // Ensure the item belongs to the user
+    });
 
     if (!deletedItem) {
       return res.status(404).json({ message: "Item not found" });

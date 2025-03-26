@@ -20,6 +20,7 @@ const CleaningSupplies = () => {
   const [isLowStock, setIsLowStock] = useState(false);
   const [closeToExpiryItems, setCloseToExpiryItems] = useState([]);
   const [isCloseToExpiry, setIsCloseToExpiry] = useState(false);
+  const token = localStorage.getItem("token");
 
   // Define table columns
   const columns = [
@@ -41,7 +42,12 @@ const CleaningSupplies = () => {
     const fetchCleaningSupplies = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:4000/inventory/cleaningSupplies"
+          "http://localhost:4000/inventory/cleaningSupplies",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+            },
+          }
         );
 
         // Transform data: Extract only the date part
@@ -52,7 +58,17 @@ const CleaningSupplies = () => {
 
         setcleaningSuppplies(formattedData); // Set state with fetched data
       } catch (err) {
-        setError(err.response?.data?.message || "Error fetching data");
+        if (err.response && err.response.status === 401) {
+          Swal.fire({
+            title: "Unauthorized",
+            text: "You are not authorized to access this resource. Please log in.",
+            icon: "error",
+          }).then(() => {
+            navigate("/login"); // Redirect to login page
+          });
+        } else {
+          setError(err.response?.data?.message || "Error fetching data");
+        }
       } finally {
         setLoading(false);
       }
@@ -120,6 +136,14 @@ const CleaningSupplies = () => {
   ];
 
   const handleSubmit = async (data) => {
+    if (!token) {
+      Swal.fire({
+        title: "Unauthorized!",
+        text: "You are not logged in. Please log in to continue.",
+        icon: "error",
+      });
+      return; // Stop further execution if not authenticated
+    }
     try {
       let response;
 
@@ -127,13 +151,23 @@ const CleaningSupplies = () => {
         // If editing an item, make a PUT request to update the item
         response = await axios.put(
           `http://localhost:4000/inventory/cleaningSupplies/${editItem._id}`,
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+            },
+          }
         );
       } else {
         // If adding a new item, make a POST request
         response = await axios.post(
           "http://localhost:4000/inventory/cleaningSupplies",
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+            },
+          }
         );
       }
 
@@ -174,7 +208,12 @@ const CleaningSupplies = () => {
   const handleViewClick = async (itemId) => {
     try {
       const response = await axios.get(
-        `http://localhost:4000/inventory/cleaningSupplies/${itemId}`
+        `http://localhost:4000/inventory/cleaningSupplies/${itemId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+          },
+        }
       );
       setViewItem(response.data);
       setIsViewModalOpen(true);
@@ -190,7 +229,12 @@ const CleaningSupplies = () => {
   const handleEditClick = async (itemId) => {
     try {
       const response = await axios.get(
-        `http://localhost:4000/inventory/cleaningSupplies/${itemId}`
+        `http://localhost:4000/inventory/cleaningSupplies/${itemId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+          },
+        }
       );
       setEditItem(response.data); // Set the item details for editing
       setIsEditModalOpen(true); // Open the modal for editing
@@ -213,7 +257,12 @@ const CleaningSupplies = () => {
       if (result.isConfirmed) {
         try {
           await axios.delete(
-            `http://localhost:4000/inventory/cleaningSupplies/${itemId}`
+            `http://localhost:4000/inventory/cleaningSupplies/${itemId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+              },
+            }
           );
 
           setcleaningSuppplies(
@@ -244,7 +293,12 @@ const CleaningSupplies = () => {
   const fetchLowStockItems = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/inventory/cleaningSupplies/low-stock"
+        "http://localhost:4000/inventory/cleaningSupplies/low-stock",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+          },
+        }
       );
 
       // Transform data: Extract only the date part
@@ -265,7 +319,12 @@ const CleaningSupplies = () => {
   const fetchCloseToExpiryItems = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/inventory/cleaningSupplies/close-to-expiry"
+        "http://localhost:4000/inventory/cleaningSupplies/close-to-expiry",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+          },
+        }
       );
       const formattedData = response.data.map((item) => ({
         ...item,

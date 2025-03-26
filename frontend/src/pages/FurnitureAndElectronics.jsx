@@ -32,13 +32,29 @@ const FurnitureAndElectronics = () => {
   useEffect(() => {
     const fetchHouseholdItems = async () => {
       try {
+        const token = localStorage.getItem("token");
         const response = await axios.get(
-          "http://localhost:4000/inventory/householdItems"
+          "http://localhost:4000/inventory/householdItems",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+            },
+          }
         );
 
         sethouseholdItems(response.data);
       } catch (err) {
-        setError(err.response?.data?.message || "Error fetching data");
+        if (err.response && err.response.status === 401) {
+          Swal.fire({
+            title: "Unauthorized",
+            text: "You are not authorized to access this resource. Please log in.",
+            icon: "error",
+          }).then(() => {
+            navigate("/login"); // Redirect to login page
+          });
+        } else {
+          setError(err.response?.data?.message || "Error fetching data");
+        }
       } finally {
         setLoading(false);
       }
@@ -89,6 +105,15 @@ const FurnitureAndElectronics = () => {
   ];
 
   const handleSubmit = async (data) => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      Swal.fire({
+        title: "Unauthorized!",
+        text: "You are not logged in. Please log in to continue.",
+        icon: "error",
+      });
+      return;
+    }
     try {
       let response;
 
@@ -96,13 +121,23 @@ const FurnitureAndElectronics = () => {
         // If editing an item, make a PUT request to update the item
         response = await axios.put(
           `http://localhost:4000/inventory/householdItems/${editItem._id}`,
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
       } else {
         // If adding a new item, make a POST request
         response = await axios.post(
           "http://localhost:4000/inventory/householdItems",
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
       }
 
@@ -142,8 +177,14 @@ const FurnitureAndElectronics = () => {
 
   const handleViewClick = async (itemId) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:4000/inventory/householdItems/${itemId}`
+        `http://localhost:4000/inventory/householdItems/${itemId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+          },
+        }
       );
       setViewItem(response.data);
       setIsViewModalOpen(true);
@@ -158,8 +199,14 @@ const FurnitureAndElectronics = () => {
 
   const handleEditClick = async (itemId) => {
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.get(
-        `http://localhost:4000/inventory/householdItems/${itemId}`
+        `http://localhost:4000/inventory/householdItems/${itemId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+          },
+        }
       );
       setEditItem(response.data); // Set the item details for editing
       setIsEditModalOpen(true); // Open the modal for editing
@@ -181,14 +228,20 @@ const FurnitureAndElectronics = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
+          const token = localStorage.getItem("token");
           await axios.delete(
-            `http://localhost:4000/inventory/householdItems/${itemId}`
+            `http://localhost:4000/inventory/householdItems/${itemId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
           );
-  
+
           sethouseholdItems(
             householdItems.filter((item) => item._id !== itemId)
           );
-  
+
           Swal.fire({
             title: "Deleted!",
             text: "The item has been removed successfully.",
@@ -198,7 +251,7 @@ const FurnitureAndElectronics = () => {
           });
         } catch (err) {
           setError("Error deleting item");
-  
+
           Swal.fire({
             title: "Error!",
             text: "Failed to delete the item. Please try again.",

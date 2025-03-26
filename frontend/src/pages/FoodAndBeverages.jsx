@@ -20,6 +20,7 @@ const FoodAndBeverages = () => {
   const [isLowStock, setIsLowStock] = useState(false);
   const [closeToExpiryItems, setCloseToExpiryItems] = useState([]);
   const [isCloseToExpiry, setIsCloseToExpiry] = useState(false);
+  const token = localStorage.getItem("token");
 
   // Define table columns
   const columns = [
@@ -41,7 +42,12 @@ const FoodAndBeverages = () => {
     const fetchFoodAndBeverages = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:4000/inventory/foodAndBeverages"
+          "http://localhost:4000/inventory/foodAndBeverages",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+            },
+          }
         ); // Adjust API URL if needed
 
         // Transform data: Extract only the date part
@@ -52,7 +58,17 @@ const FoodAndBeverages = () => {
 
         setFoodItems(formattedData); // Set state with fetched data
       } catch (err) {
-        setError(err.response?.data?.message || "Error fetching data");
+        if (err.response && err.response.status === 401) {
+          Swal.fire({
+            title: "Unauthorized",
+            text: "You are not authorized to access this resource. Please log in.",
+            icon: "error",
+          }).then(() => {
+            navigate("/login"); // Redirect to login page
+          });
+        } else {
+          setError(err.response?.data?.message || "Error fetching data");
+        }
       } finally {
         setLoading(false);
       }
@@ -67,7 +83,12 @@ const FoodAndBeverages = () => {
   const handleViewClick = async (itemId) => {
     try {
       const response = await axios.get(
-        `http://localhost:4000/inventory/foodAndBeverages/${itemId}`
+        `http://localhost:4000/inventory/foodAndBeverages/${itemId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       setViewItem(response.data);
       setIsViewModalOpen(true);
@@ -82,7 +103,12 @@ const FoodAndBeverages = () => {
   const handleEditClick = async (itemId) => {
     try {
       const response = await axios.get(
-        `http://localhost:4000/inventory/foodAndBeverages/${itemId}`
+        `http://localhost:4000/inventory/foodAndBeverages/${itemId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       setEditItem(response.data); // Set the item details for editing
       setIsEditModalOpen(true); // Open the modal for editing
@@ -104,7 +130,12 @@ const FoodAndBeverages = () => {
       if (result.isConfirmed) {
         try {
           await axios.delete(
-            `http://localhost:4000/inventory/foodAndBeverages/${itemId}`
+            `http://localhost:4000/inventory/foodAndBeverages/${itemId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            }
           );
           setFoodItems(foodItems.filter((item) => item._id !== itemId));
 
@@ -131,7 +162,12 @@ const FoodAndBeverages = () => {
   const fetchLowStockItems = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/inventory/foodAndBeverages/low-stock"
+        "http://localhost:4000/inventory/foodAndBeverages/low-stock",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       // Transform data: Extract only the date part
@@ -152,7 +188,12 @@ const FoodAndBeverages = () => {
   const fetchCloseToExpiryItems = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:4000/inventory/foodAndBeverages/close-to-expiry"
+        "http://localhost:4000/inventory/foodAndBeverages/close-to-expiry",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
       const formattedData = response.data.map((item) => ({
         ...item,
@@ -207,7 +248,7 @@ const FoodAndBeverages = () => {
         "Vegetables",
         "Fruits",
         "Grains",
-        "Condiments"
+        "Condiments",
       ],
     },
     {
@@ -249,6 +290,14 @@ const FoodAndBeverages = () => {
   ];
 
   const handleSubmit = async (data) => {
+    if (!token) {
+      Swal.fire({
+        title: "Unauthorized!",
+        text: "You are not logged in. Please log in to continue.",
+        icon: "error",
+      });
+      return; // Stop further execution if not authenticated
+    }
     try {
       let response;
 
@@ -256,13 +305,23 @@ const FoodAndBeverages = () => {
         // If editing an item, make a PUT request to update the item
         response = await axios.put(
           `http://localhost:4000/inventory/foodAndBeverages/${editItem._id}`,
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
       } else {
         // If adding a new item, make a POST request
         response = await axios.post(
           "http://localhost:4000/inventory/foodAndBeverages",
-          data
+          data,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
       }
 
@@ -615,7 +674,7 @@ const FoodAndBeverages = () => {
                   "Vegetables",
                   "Fruits",
                   "Grains",
-                  "Condiments"
+                  "Condiments",
                 ],
               },
               {

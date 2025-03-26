@@ -1,14 +1,18 @@
 import toolsAndMaintainenceItems from "../models/toolsModel.js";
+import users from "../models/userModel.js";
 
 // Add a new Tools & Maintainence Item
 export const addToolSAndMaintanenceItem = async (req, res) => {
   try {
+    const { itemName, category, quantity, storageTypeLocation } = req.body;
+    const userId = req.userId;
     // Check if an item with the same parameters already exists
     const existingItem = await toolsAndMaintainenceItems.findOne({
       itemName: req.body.itemName,
       category: req.body.category,
       expiryDate: req.body.expiryDate,
       storageTypeLocation: req.body.storageTypeLocation,
+      user: userId,
     });
 
     if (existingItem) {
@@ -17,7 +21,10 @@ export const addToolSAndMaintanenceItem = async (req, res) => {
         .json({ message: "Item with the same parameters already exists" });
     }
 
-    const newItem = new toolsAndMaintainenceItems(req.body);
+    const newItem = new toolsAndMaintainenceItems({
+      ...req.body,
+      user: userId, // Associate the item with the user
+    });
     const savedItem = await newItem.save();
     res
       .status(201)
@@ -29,10 +36,16 @@ export const addToolSAndMaintanenceItem = async (req, res) => {
   }
 };
 
-// Get all Tools & Maintainence items
+// Get all Tools & Maintainence items for a specific user
 export const getAllToolSAndMaintanenceItems = async (req, res) => {
   try {
-    const items = await toolsAndMaintainenceItems.find().sort({ updatedAt: -1 });
+    const userId = req.userId; // Assuming the userId is set in req.userId after authentication
+
+    // Fetch items only for the logged-in user
+    const items = await toolsAndMaintainenceItems
+      .find({ user: userId }) // Filter by userId
+      .sort({ updatedAt: -1 });
+
     res.status(200).json(items);
   } catch (error) {
     res
@@ -41,10 +54,15 @@ export const getAllToolSAndMaintanenceItems = async (req, res) => {
   }
 };
 
-// Get a Tools & Maintainence item by ID
+// Get a Tools & Maintainence item by ID for a specific user
 export const getToolSAndMaintanenceItemById = async (req, res) => {
   try {
-    const item = await toolsAndMaintainenceItems.findById(req.params.id);
+    const userId = req.userId; // Assuming the userId is set in req.userId after authentication
+
+    const item = await toolsAndMaintainenceItems.findOne({
+      _id: req.params.id,
+      user: userId, // Check if the item belongs to the user
+    });
 
     if (!item) {
       return res.status(404).json({ message: "Item not found" });
@@ -58,12 +76,13 @@ export const getToolSAndMaintanenceItemById = async (req, res) => {
   }
 };
 
-// Update a Tools & Maintainence item by ID
+// Update a Tools & Maintainence item by ID for a specific user
 export const updateToolSAndMaintanenceItemById = async (req, res) => {
   try {
-    // Find the item by ID and update it with the new data from the request body
-    const updatedItem = await toolsAndMaintainenceItems.findByIdAndUpdate(
-      req.params.id,
+    const userId = req.userId; // Assuming the userId is set in req.userId after authentication
+
+    const updatedItem = await toolsAndMaintainenceItems.findOneAndUpdate(
+      { _id: req.params.id, user: userId }, // Ensure the item belongs to the user
       req.body,
       { new: true }
     );
@@ -82,10 +101,15 @@ export const updateToolSAndMaintanenceItemById = async (req, res) => {
   }
 };
 
-// Delete a Tools & Maintainence item by ID
+// Delete a Tools & Maintainence item by ID for a specific user
 export const deleteToolSAndMaintanenceItemById = async (req, res) => {
   try {
-    const deletedItem = await toolsAndMaintainenceItems.findByIdAndDelete(req.params.id);
+    const userId = req.userId; // Assuming the userId is set in req.userId after authentication
+
+    const deletedItem = await toolsAndMaintainenceItems.findOneAndDelete({
+      _id: req.params.id,
+      user: userId, // Ensure the item belongs to the user
+    });
 
     if (!deletedItem) {
       return res.status(404).json({ message: "Item not found" });

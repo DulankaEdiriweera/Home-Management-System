@@ -1,7 +1,7 @@
-//side ba
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const TaskSideBar = ({ onFilterChange }) => {
+const TaskSideBar = ({ onFilterChange, onViewProgress }) => {
     const [category, setCategory] = useState('All');
     const [status, setStatus] = useState(''); // Default to no status selected
     const [priority, setPriority] = useState(''); // Default to no priority selected
@@ -40,7 +40,7 @@ const TaskSideBar = ({ onFilterChange }) => {
                 <select
                     value={category}
                     onChange={handleCategoryChange}
-                    className="w-full bg-gray-700 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="w-full bg-blue-900 text-white px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 >
                     <option value="All">All</option>
                     <option value="Cooking">Cooking</option>
@@ -138,6 +138,13 @@ const TaskSideBar = ({ onFilterChange }) => {
             >
                 Reset Filters
             </button>
+
+            <Link
+                to="/task-progress"
+                className="w-full bg-blue-900 text-white py-2 rounded-lg mt-6 hover:bg-blue-400 flex items-center justify-center"
+            >
+                <span className="mr-2">📊</span> View Progress
+            </Link>
         </div>
     );
 };

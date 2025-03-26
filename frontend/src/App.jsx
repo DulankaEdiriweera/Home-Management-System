@@ -19,6 +19,7 @@ import AddItem from "./pages/AddItem";
 import RecipeGenerator from "./pages/RecipeGenerator";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
+import TaskProgressPage from "./pages/TaskProgressPage";
 
 const App = () => {
   return (
@@ -47,7 +48,8 @@ const App = () => {
 
         <Route path="/signUp" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
-        
+        <Route path="/task-progress" element={<TaskProgressPage />} />
+
       </Routes>
       <Footer />
     </div>

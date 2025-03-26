@@ -22,7 +22,12 @@ const AutoRecipeGenerator = () => {
     try {
       setLoading(true);
       const response = await axios.get(
-        "http://localhost:4000/inventory/foodAndBeverages/close-to-expiry"
+        "http://localhost:4000/inventory/foodAndBeverages/close-to-expiry",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+          },
+        }
       );
 
       const formattedData = response.data.map((item) => ({
@@ -379,11 +384,10 @@ const AutoRecipeGenerator = () => {
               {/* Action Buttons */}
               <div className="flex justify-between mb-6">
                 <button
-                  className={`${
-                    regenerating
-                      ? "bg-gray-400"
-                      : "bg-blue-500 hover:bg-purple-700"
-                  } text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2 shadow-md transition`}
+                  className={`${regenerating
+                    ? "bg-gray-400"
+                    : "bg-blue-500 hover:bg-purple-700"
+                    } text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2 shadow-md transition`}
                   onClick={regenerateRecipes}
                   disabled={regenerating}
                 >

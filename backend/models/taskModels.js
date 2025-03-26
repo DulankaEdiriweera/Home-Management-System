@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import users from "../models/userModel.js";
 
 const taskSchema = new mongoose.Schema(
   {
@@ -29,10 +30,11 @@ const taskSchema = new mongoose.Schema(
       required: true,
       enum: ["Not Started", "In Progress", "Completed"], // Example status options
     },
-    completed: {
-      type: Boolean,
-      default: false,
-    },
+    user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "users", // Reference to the 'users' collection
+          required: true, // Ensure this field is always provided
+        },
   },
   { timestamps: true }
 );

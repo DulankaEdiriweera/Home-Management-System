@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Routes,Navigate } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -20,6 +20,8 @@ import RecipeGenerator from "./pages/RecipeGenerator";
 import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import ProtectedRoutes from "./components/ProtectedRoutes";
+import TaskProgressPage from "./pages/TaskProgressPage";
+
 
 const App = () => {
   return (
@@ -46,9 +48,10 @@ const App = () => {
           <Route path="/shoppingList" element={<ShoppingList />} />
           <Route path="/add-item" element={<AddItem />} />
           <Route path="/recipe-suggestions" element={<RecipeGenerator />} />
+          <Route path="/task-progress" element={<TaskProgressPage />} />
         </Route>
-         {/* Catch-all for unrecognized routes */}
-         <Route path="*" element={<Navigate to="/login" />} />
+        {/* Catch-all for unrecognized routes */}
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
       <Footer />
     </div>

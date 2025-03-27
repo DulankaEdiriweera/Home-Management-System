@@ -27,11 +27,40 @@ const TaskProgressPage = () => {
     const fetchTasks = async () => {
         setLoading(true);
         try {
-            const response = await axios.get("http://localhost:4000/task");
+            // Get the token from localStorage
+            const token = localStorage.getItem('token');
+
+            // If no token is found, redirect to login or handle unauthorized access
+            if (!token) {
+                setError("No authentication token found");
+                navigate('/login'); // Redirect to login page
+                return;
+            }
+
+            const response = await axios.get("http://localhost:4000/task", {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
             setTasks(response.data);
             processTaskData(response.data);
         } catch (err) {
-            setError("Failed to fetch task data");
+            // Handle different types of errors
+            if (err.response) {
+                if (err.response.status === 401) {
+                    setError("Unauthorized: Please log in again");
+                    navigate('/login');
+                } else if (err.response.status === 403) {
+                    setError("Forbidden: You do not have permission to access this resource");
+                } else {
+                    setError("Failed to fetch task data");
+                }
+            } else if (err.request) {
+                setError("No response received from server");
+            } else {
+                setError("Error setting up the request");
+            }
+            console.error("Fetch tasks error:", err);
         } finally {
             setLoading(false);
         }
@@ -150,7 +179,7 @@ const TaskProgressPage = () => {
                     </div>
                 ) : (
                     <>
-                        {/* MOVED TO TOP: Overdue and Upcoming Tasks */}
+                        {/* Overdue and Upcoming Tasks */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                             {/* Overdue Tasks Panel */}
                             <div className="bg-white rounded-lg shadow-md p-6">

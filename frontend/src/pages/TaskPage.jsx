@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import MiniSideBar_Task from "../components/MiniSideBar_Task";
 import axios from "axios";
 import Swal from "sweetalert2";
+import jsPDF from "jspdf";
+import { FaFilePdf } from "react-icons/fa";
+import autoTable from "jspdf-autotable";
 
 const TaskPage = () => {
     const [tasks, setTasks] = useState([]);
@@ -47,12 +50,29 @@ const TaskPage = () => {
     const fetchTasks = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`http://localhost:4000/task?_limit=${taskCount}`);
+            const token = localStorage.getItem("token");
+            const response = await axios.get(
+                `http://localhost:4000/task?_limit=${taskCount}`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
             setTasks(response.data);
-            // Apply filters to the newly fetched data
             applyFilters(response.data);
         } catch (err) {
-            setError("Failed to fetch tasks");
+            if (err.response && err.response.status === 401) {
+                Swal.fire({
+                    title: "Unauthorized",
+                    text: "You are not authorized to access this resource. Please log in.",
+                    icon: "error",
+                }).then(() => {
+                    navigate("/login");
+                });
+            } else {
+                setError(err.response?.data?.message || "Failed to fetch tasks");
+            }
         } finally {
             setLoading(false);
         }
@@ -194,35 +214,63 @@ const TaskPage = () => {
         // Clear any remaining form errors
         setFormErrors({});
 
+        const token = localStorage.getItem("token");
+        if (!token) {
+            Swal.fire({
+                title: "Unauthorized!",
+                text: "You are not logged in. Please log in to continue.",
+                icon: "error",
+            });
+            return;
+        }
+
         try {
             setLoading(true);
-            const response = await axios.post("http://localhost:4000/task", { ...newTask, createdAt: new Date() });
-            setNewTask({
-                title: "",
-                category: "",
-                description: "",
-                dueDate: "",
-                priority: "",
-                status: "",
-                completed: false,
-            });
-            setShowAddForm(false);
+            const response = await axios.post(
+                "http://localhost:4000/task",
+                { ...newTask, createdAt: new Date() },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
 
-            // Fetch all tasks again to ensure we have the most up-to-date data
-            await fetchTasks();
+            // Check for successful response status
+            if (response.status >= 200 && response.status < 300) {
+                setNewTask({
+                    title: "",
+                    category: "",
+                    description: "",
+                    dueDate: "",
+                    priority: "",
+                    status: "",
+                    completed: false,
+                });
+                setShowAddForm(false);
 
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: 'Task added successfully!',
-                timer: 2000,
-                showConfirmButton: false
-            });
+                // Fetch all tasks again to ensure we have the most up-to-date data
+                await fetchTasks();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: response.data.message || 'Task added successfully!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    title: "Unexpected Response",
+                    text: "Unexpected response from server.",
+                    icon: "warning",
+                });
+            }
         } catch (err) {
-
+            console.error("Error details:", err);
             Swal.fire({
                 title: "Error!",
-                text: "Failed to add the task.",
+                text: err.response?.data?.message || "Failed to add the task.",
                 icon: "error",
             });
         } finally {
@@ -243,27 +291,55 @@ const TaskPage = () => {
         // Clear any remaining form errors
         setFormErrors({});
 
+        const token = localStorage.getItem("token");
+        if (!token) {
+            Swal.fire({
+                title: "Unauthorized!",
+                text: "You are not logged in. Please log in to continue.",
+                icon: "error",
+            });
+            return;
+        }
+
         try {
             setLoading(true);
-            await axios.put(`http://localhost:4000/task/${editTask._id}`, editTask);
-            setEditTask(null);
-            setShowEditForm(false);
+            const response = await axios.put(
+                `http://localhost:4000/task/${editTask._id}`,
+                editTask,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
 
-            // Fetch all tasks again to ensure we have the most up-to-date data
-            await fetchTasks();
+            // Check for successful response status
+            if (response.status >= 200 && response.status < 300) {
+                setEditTask(null);
+                setShowEditForm(false);
 
-            Swal.fire({
-                icon: 'success',
-                title: 'Success!',
-                text: 'Task updated successfully!',
-                timer: 2000,
-                showConfirmButton: false
-            });
+                // Fetch all tasks again to ensure we have the most up-to-date data
+                await fetchTasks();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: response.data.message || 'Task updated successfully!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    title: "Unexpected Response",
+                    text: "Unexpected response from server.",
+                    icon: "warning",
+                });
+            }
         } catch (err) {
-            setError("Failed to update task");
+            console.error("Error details:", err);
             Swal.fire({
                 title: "Error!",
-                text: "Failed to update the task.",
+                text: err.response?.data?.message || "Failed to update the task.",
                 icon: "error",
             });
         } finally {
@@ -272,6 +348,16 @@ const TaskPage = () => {
     };
 
     const handleDeleteTask = async (taskId) => {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            Swal.fire({
+                title: "Unauthorized!",
+                text: "You are not logged in. Please log in to continue.",
+                icon: "error",
+            });
+            return;
+        }
+
         const { isConfirmed } = await Swal.fire({
             title: 'Are you sure?',
             text: "You won't be able to revert this!",
@@ -281,26 +367,43 @@ const TaskPage = () => {
             confirmButtonColor: '#3085d6',
             confirmButtonText: 'Yes, delete it!'
         });
+
         if (isConfirmed) {
             try {
                 setLoading(true);
-                await axios.delete(`http://localhost:4000/task/${taskId}`);
+                const response = await axios.delete(
+                    `http://localhost:4000/task/${taskId}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
 
-                // Fetch all tasks again to ensure we have the most up-to-date data
-                await fetchTasks();
+                // Check for successful response status
+                if (response.status >= 200 && response.status < 300) {
+                    // Fetch all tasks again to ensure we have the most up-to-date data
+                    await fetchTasks();
 
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: 'Task deleted successfully!',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.data.message || 'Task deleted successfully!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Unexpected Response",
+                        text: "Unexpected response from server.",
+                        icon: "warning",
+                    });
+                }
             } catch (err) {
-                setError("Failed to delete task");
+                console.error("Error details:", err);
                 Swal.fire({
                     title: "Error!",
-                    text: "Failed to delete the task.",
+                    text: err.response?.data?.message || "Failed to delete the task.",
                     icon: "error",
                 });
             } finally {
@@ -308,7 +411,6 @@ const TaskPage = () => {
             }
         }
     };
-
     const formatDate = (dateString) => {
         if (!dateString) return "No date";
         const date = new Date(dateString);
@@ -342,37 +444,86 @@ const TaskPage = () => {
         return date.toISOString().split('T')[0];
     };
 
-    // Function to download tasks report as CSV
-    const downloadTasksReport = () => {
-        // CSV Header
-        let csvContent = "Title,Category,Description,Due Date,Priority,Status,Created At\n";
+    const handleExportTasksPDF = () => {
+        const doc = new jsPDF();
 
-        // Adding task data rows
-        filteredTasks.forEach(task => {
-            const dueDate = task.dueDate ? formatDate(task.dueDate) : "No date";
-            const createdAt = task.createdAt ? formatDate(task.createdAt) : "Unknown";
+        // Add title with style
+        doc.setFontSize(18);
+        doc.setFont("helvetica", "bold");
+        doc.text("Tasks Report", 14, 20);
 
-            // Escape commas and quotes in text fields
-            const safeTitle = `"${task.title.replace(/"/g, '""')}"`;
-            const safeCategory = `"${task.category.replace(/"/g, '""')}"`;
-            const safeDescription = `"${task.description.replace(/"/g, '""')}"`;
+        // Add generation date
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.text("Generated on: " + new Date().toLocaleDateString(), 14, 28);
 
-            csvContent += `${safeTitle},${safeCategory},${safeDescription},${dueDate},${task.priority},${task.status},${createdAt}\n`;
+        // Group tasks by category
+        const categoryData = {};
+        filteredTasks.forEach((task) => {
+            if (!categoryData[task.category]) {
+                categoryData[task.category] = [];
+            }
+            categoryData[task.category].push(task);
         });
 
-        // Create downloadable blob
-        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-        const url = URL.createObjectURL(blob);
+        let startY = 40; // Start position for tables
 
-        // Create and trigger download link
-        const link = document.createElement("a");
-        link.setAttribute("href", url);
-        link.setAttribute("download", `tasks_report_${new Date().toISOString().split('T')[0]}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Loop through categories
+        Object.entries(categoryData).forEach(([category, tasks]) => {
+            // Category header
+            doc.setFontSize(14);
+            doc.setFont("helvetica", "bold");
+            doc.text(category, 14, startY);
+            startY += 8;
+
+            // Table header
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            const tableHeader = [["Title", "Priority", "Status", "Due Date"]];
+
+            // Table data
+            const tableData = tasks.map((task) => [
+                task.title,
+                task.priority,
+                task.status,
+                task.dueDate ? formatDate(task.dueDate) : "No date"
+            ]);
+
+            // Add table
+            autoTable(doc, {
+                startY,
+                head: tableHeader,
+                body: tableData,
+                theme: "grid",
+                headStyles: {
+                    fillColor: [59, 130, 246],
+                    textColor: [255, 255, 255]
+                },
+                bodyStyles: {
+                    fillColor: [240, 240, 240]
+                },
+                styles: {
+                    fontSize: 10,
+                    cellPadding: 3,
+                    halign: "center"
+                },
+            });
+
+            // Update Y position for the next category
+            startY = doc.lastAutoTable.finalY + 10;
+
+            // Total tasks in category
+            doc.setFontSize(12);
+            doc.setFont("helvetica", "bold");
+            doc.text(`Total Tasks in ${category} category: ${tasks.length}`, 14, startY);
+
+            // Add some spacing before the next category
+            startY += 15;
+        });
+
+        // Save the generated PDF
+        doc.save(`Tasks_Report_${new Date().toISOString().split('T')[0]}.pdf`);
     };
-
     return (
         <div className="flex p-2 min-h-screen">
             <MiniSideBar_Task onFilterChange={handleFilterChange} />
@@ -407,16 +558,15 @@ const TaskPage = () => {
                         </div>
                     </div>
 
-                    {/* Download Report Button */}
-                    <button
-                        onClick={downloadTasksReport}
-                        className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                        Download Report
-                    </button>
+                    {/* Right: Other Buttons */}
+                    <div className="flex space-x-2">
+                        <button
+                            className="bg-green-600 text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2 hover:bg-green-700 shadow-md"
+                            onClick={handleExportTasksPDF}
+                        >
+                            <FaFilePdf /> Export PDF
+                        </button>
+                    </div>
                 </div>
 
                 {/* Display active filters */}

@@ -13,8 +13,20 @@ const AutoRecipeGenerator = () => {
   const [generatedRecipes, setGeneratedRecipes] = useState([]);
   const [error, setError] = useState(null);
   const [regenerating, setRegenerating] = useState(false);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
+    // Check if token exists, if not redirect to login
+    if (!token) {
+      Swal.fire({
+        title: "Unauthorized",
+        text: "You must be logged in to access this page.",
+        icon: "error",
+      }).then(() => {
+        navigate("/login");
+      });
+      return;
+    }
     fetchExpiringItemsAndGenerateRecipes();
   }, []);
 
@@ -59,7 +71,17 @@ const AutoRecipeGenerator = () => {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Error fetching expiring items");
+      if (err.response && err.response.status === 401) {
+        Swal.fire({
+          title: "Unauthorized",
+          text: "You are not authorized to access this resource. Please log in.",
+          icon: "error",
+        }).then(() => {
+          navigate("/login"); // Redirect to login page
+        });
+      } else {
+        setError(err.response?.data?.message || "Error fetching expiring items");
+      }
     } finally {
       setLoading(false);
       setRegenerating(false);
@@ -67,6 +89,16 @@ const AutoRecipeGenerator = () => {
   };
 
   const regenerateRecipes = () => {
+    if (!token) {
+      Swal.fire({
+        title: "Unauthorized",
+        text: "You must be logged in to regenerate recipes.",
+        icon: "error",
+      }).then(() => {
+        navigate("/login");
+      });
+      return;
+    }
     setRegenerating(true);
     const categorizedItems = categorizeIngredients(expiringItems);
     const newSuggestions = createRecipeSuggestions(
@@ -302,10 +334,27 @@ const AutoRecipeGenerator = () => {
   };
 
   const handleSaveRecipe = async (recipe) => {
+    // Check if token exists before saving
+    if (!token) {
+      Swal.fire({
+        title: "Unauthorized!",
+        text: "You are not logged in. Please log in to continue.",
+        icon: "error",
+      }).then(() => {
+        navigate("/login");
+      });
+      return;
+    }
+
     try {
       const response = await axios.post(
         "http://localhost:4000/recipes/save",
-        recipe
+        recipe,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+          },
+        }
       );
 
       Swal.fire({
@@ -316,12 +365,22 @@ const AutoRecipeGenerator = () => {
         showConfirmButton: false,
       });
     } catch (err) {
-      console.error("Error saving recipe:", err);
-      Swal.fire({
-        title: "Error!",
-        text: "Failed to save recipe. Please try again.",
-        icon: "error",
-      });
+      if (err.response && err.response.status === 401) {
+        Swal.fire({
+          title: "Unauthorized",
+          text: "You are not authorized to save recipes. Please log in.",
+          icon: "error",
+        }).then(() => {
+          navigate("/login"); // Redirect to login page
+        });
+      } else {
+        console.error("Error saving recipe:", err);
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to save recipe. Please try again.",
+          icon: "error",
+        });
+      }
     }
   };
 

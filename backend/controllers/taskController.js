@@ -1,9 +1,11 @@
 import taskModels from "../models/taskModels.js";
+import users from "../models/userModel.js";
 
 // Add a new Task
 export const addTask = async (req, res) => {
   try {
     // Check if a task with the same parameters already exists
+    const userId = req.userId;
     const existingTask = await taskModels.findOne({
       category: req.body.category,
       title: req.body.title,
@@ -11,34 +13,47 @@ export const addTask = async (req, res) => {
       dueDate: req.body.dueDate,
       priority: req.body.priority,
       status: req.body.status,
+      users: userId,
     });
 
     if (existingTask) {
       return res.status(400).json({ message: "Task with the same parameters already exists" });
     }
 
-    const newTask = new taskModels(req.body);
+    const newTask = new taskModels({
+      ...req.body,
+      user: userId, // Associate the item with the user
+    });
     const savedTask = await newTask.save();
-    res.status(201).json({ message: "Task added successfully", task: savedTask });
+    res
+      .status(201)
+      .json({ message: "Task added successfully", task: savedTask });
   } catch (error) {
-    res.status(500).json({ message: "Error adding task", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error adding task", error: error.message });
   }
 };
 
-// Get all tasks
+// Get all tasks for specific user
 export const getAllTasks = async (req, res) => {
   try {
-    const tasks = await taskModels.find().sort({ updatedAt: -1 });
+    const userId = req.userId; // Assuming the userId is set in req.userId after authentication
+    const tasks = await taskModels.find({ user: userId }).sort({ updatedAt: -1 });
     res.status(200).json(tasks);
   } catch (error) {
     res.status(500).json({ message: "Error retrieving tasks", error: error.message });
   }
 };
 
-// Get a task by ID
+// Get a task by ID for specific user
 export const getTaskById = async (req, res) => {
   try {
-    const task = await taskModels.findById(req.params.id);
+    const userId = req.userId; // Assuming the userId is set in req.userId after authentication
+    const task = await taskModels.findOne({
+      _id: req.params.id,
+      user: userId, // Check if the item belongs to the user
+    });
 
     if (!task) {
       return res.status(404).json({ message: "Task not found" });
@@ -50,14 +65,16 @@ export const getTaskById = async (req, res) => {
   }
 };
 
-// Update a task by ID
+// Update a task by ID for specific user
 export const updateTaskById = async (req, res) => {
   try {
+    
+    const userId = req.userId; // Assuming the userId is set in req.userId after authentication
     // Find the task by ID and update it with the new data from the request body
-    const updatedTask = await taskModels.findByIdAndUpdate(
-      req.params.id,  // the ID of the task to update
-      req.body,       // the data to update the task with
-      { new: true }    // return the updated task
+    const updatedTask = await taskModels.findOneAndUpdate(
+      { _id: req.params.id, user: userId }, // Ensure the item belongs to the user
+      req.body,
+      { new: true }
     );
 
     if (!updatedTask) {
@@ -70,10 +87,14 @@ export const updateTaskById = async (req, res) => {
   }
 };
 
-// Delete a task by ID
+// Delete a task by ID for a specific user
 export const deleteTaskById = async (req, res) => {
   try {
-    const deletedTask = await taskModels.findByIdAndDelete(req.params.id);
+    const userId = req.userId; // Assuming the userId is set in req.userId after authentication
+    const deletedTask = await taskModels.findOneAndDelete({
+      _id: req.params.id,
+      user: userId, // Ensure the item belongs to the user
+    });
 
     if (!deletedTask) {
       return res.status(404).json({ message: "Task not found" });

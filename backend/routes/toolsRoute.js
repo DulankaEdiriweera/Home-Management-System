@@ -6,13 +6,14 @@ import {
   getToolSAndMaintanenceItemById,
   updateToolSAndMaintanenceItemById,
 } from "../controllers/toolsController.js";
+import AuthenticateUser from "../middlewares/AuthenticateUser.js";
 
 const router = express.Router();
 
-router.post("/", addToolSAndMaintanenceItem);
-router.get("/", getAllToolSAndMaintanenceItems);
-router.get("/:id", getToolSAndMaintanenceItemById);
-router.put("/:id", updateToolSAndMaintanenceItemById);
-router.delete("/:id", deleteToolSAndMaintanenceItemById);
+router.post("/", AuthenticateUser, addToolSAndMaintanenceItem);
+router.get("/", AuthenticateUser, getAllToolSAndMaintanenceItems);
+router.get("/:id",AuthenticateUser,  getToolSAndMaintanenceItemById);
+router.put("/:id", AuthenticateUser, updateToolSAndMaintanenceItemById);
+router.delete("/:id", AuthenticateUser, deleteToolSAndMaintanenceItemById);
 
 export default router;

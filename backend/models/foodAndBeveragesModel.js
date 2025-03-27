@@ -34,6 +34,11 @@ const foodAndBeveragesSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "users", // Reference to the 'users' collection
+          required: true, // Ensure this field is always provided
+        },
   },
   { timestamps: true }
 );

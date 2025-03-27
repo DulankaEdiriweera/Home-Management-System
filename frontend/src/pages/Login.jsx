@@ -1,36 +1,74 @@
-import React from 'react'
-import LoginImg from '../assets/Login.jpg'
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import axios from "axios";
+import LoginImg from "../assets/Login.jpg";
+import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Login = () => {
-
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
-  const handleLogin = (e) => {
+  // Handle input change
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // Handle login submission
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Simulate login and save user state
-    localStorage.setItem('isAuthenticated', 'true');
-    navigate('/');
-    window.location.reload(); // Refresh to update header state
+
+    try {
+      const response = await axios.post(
+        "http://localhost:4000/user/login",
+        formData
+      );
+
+      // Store authentication token or user info (depends on backend)
+      localStorage.setItem("token", response.data.token);
+      localStorage.setItem("userName", response.data.user.fullName);
+      localStorage.setItem("isAuthenticated", "true");
+
+      Swal.fire({
+        icon: "success",
+        title: "Login Successful!",
+        text: "You have successfully logged in.",
+        timer: 2000,
+      });
+      // Delay navigation to ensure SweetAlert shows up before redirecting
+      setTimeout(() => {
+        navigate("/");
+        window.location.reload(); // Refresh to update header state
+      }, 3000); // Wait 3 seconds before navigating
+    } catch (error) {
+      console.error("Login Error:", error.response?.data || error.message);
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text:
+          error.response?.data?.message ||
+          "Something went wrong. Please try again.",
+      });
+    }
   };
 
   return (
     <div className="flex p-5">
       {/* Left side - Image */}
       <div className="w-1/2 p-8 flex flex-col justify-center bg-white">
-        <img
-          src={LoginImg}
-          alt="Login"
-          className="w-full h-full rounded-2xl"
-        />
+        <img src={LoginImg} alt="Login" className="w-full h-full rounded-2xl" />
       </div>
 
       {/* Right side - Form */}
       <div className="w-1/2 p-8 flex flex-col justify-center bg-white">
-        <h2 className="text-3xl font-bold mb-6 text-center">Login to Your Account</h2>
+        <h2 className="text-3xl font-bold mb-6 text-center">
+          Login to Your Account
+        </h2>
         <form className="p-10" onSubmit={handleLogin}>
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-semibold text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-semibold text-gray-700"
+            >
               Email
             </label>
             <input
@@ -38,12 +76,17 @@ const Login = () => {
               id="email"
               name="email"
               required
+              value={formData.email}
+              onChange={handleChange}
               className="w-full mt-2 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div className="mb-6">
-            <label htmlFor="password" className="block text-sm font-semibold text-gray-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-semibold text-gray-700"
+            >
               Password
             </label>
             <input
@@ -51,6 +94,8 @@ const Login = () => {
               id="password"
               name="password"
               required
+              value={formData.password}
+              onChange={handleChange}
               className="w-full mt-2 p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -63,7 +108,7 @@ const Login = () => {
           </button>
 
           <p className="text-center p-3">
-            Don't have an account?{' '}
+            Don't have an account?{" "}
             <a href="/signUp" className="text-blue-600">
               Sign Up
             </a>
@@ -71,7 +116,7 @@ const Login = () => {
         </form>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;

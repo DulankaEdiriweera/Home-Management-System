@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
   // Get current location from React Router
@@ -11,15 +11,24 @@ const Header = () => {
   // Login
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
-    setIsAuthenticated(localStorage.getItem('isAuthenticated') === 'true');
+    const authStatus = localStorage.getItem("isAuthenticated") === "true";
+    setIsAuthenticated(authStatus);
+    if (authStatus) {
+      const storedUserName = localStorage.getItem("userName");
+      console.log("Stored userName:", storedUserName); // Debug line
+      setUserName(storedUserName || "User");
+    }
   }, []);
 
   const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
+    localStorage.removeItem("isAuthenticated");
+    localStorage.removeItem("userName"); // Clear the user's name as well
     setIsAuthenticated(false);
-    navigate('/');
+    setUserName("");
+    navigate("/");
     window.location.reload();
   };
 
@@ -97,15 +106,28 @@ const Header = () => {
       {/* Authentication Buttons */}
       <div className="flex space-x-4">
         {isAuthenticated ? (
-          <button onClick={handleLogout} className="bg-red-500 text-white py-2 px-6 rounded-full font-medium hover:bg-red-600">
-            LOGOUT
-          </button>
+          <>
+            {/* Display User's Name */}
+            <span className="font-medium text-lg">Hello, {userName}</span>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 text-white py-2 px-6 rounded-full font-medium hover:bg-red-600"
+            >
+              LOGOUT
+            </button>
+          </>
         ) : (
           <>
-            <button onClick={() => navigate('/signUp')} className="bg-blue-500 text-white py-2 px-6 rounded-full font-medium hover:bg-blue-600">
+            <button
+              onClick={() => navigate("/signUp")}
+              className="bg-blue-500 text-white py-2 px-6 rounded-full font-medium hover:bg-blue-600"
+            >
               SIGNUP
             </button>
-            <button onClick={() => navigate('/login')} className="bg-blue-500 text-white py-2 px-6 rounded-full font-medium hover:bg-blue-600">
+            <button
+              onClick={() => navigate("/login")}
+              className="bg-blue-500 text-white py-2 px-6 rounded-full font-medium hover:bg-blue-600"
+            >
               LOGIN
             </button>
           </>

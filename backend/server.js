@@ -12,6 +12,7 @@ import taskRoutes from "./routes/taskRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
 import shoppingListRoutes from "./routes/shoppingListRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import recipeRoutes from "./routes/recipeRoute.js"
 
 //App Config
 const app = express();
@@ -40,5 +41,7 @@ app.use("/expenses", expenseRoutes);
 app.use("/shoppingList", shoppingListRoutes);
 
 app.use("/user", userRoutes);
+
+app.use("/recipes", recipeRoutes)
 
 app.listen(port, () => console.log("Server Started", port));

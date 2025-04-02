@@ -511,7 +511,7 @@ const CleaningSupplies = () => {
               className="bg-red-500 text-white px-4 py-2 rounded-xl font-semibold hover:bg-red-600 shadow-md"
               onClick={fetchCloseToExpiryItems}
             >
-              Items Close to Expire
+              Items Close to Expire/Expired
             </button>
             <button
               className="bg-green-600 text-white px-4 py-2 rounded-xl font-semibold flex items-center gap-2 hover:bg-green-700 shadow-md"

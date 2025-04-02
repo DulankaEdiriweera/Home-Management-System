@@ -7,6 +7,7 @@ import { GiMedicinePills } from "react-icons/gi";
 import { MdChair } from "react-icons/md";
 import { FaTools } from "react-icons/fa";
 import { GiHotMeal } from "react-icons/gi";
+import { IoBarChartSharp } from "react-icons/io5";
 
 const SideBarInventory = () => {
   return (
@@ -41,6 +42,11 @@ const SideBarInventory = () => {
             to="/toolsAndMaintainence"
             icon={<FaTools />}
             label="Tools & Maintainence Items"
+          />
+          <SidebarItem
+            to="/charts"
+            icon={<IoBarChartSharp />}
+            label="Charts"
           />
            <SidebarItem
             to="/recipe-suggestions"

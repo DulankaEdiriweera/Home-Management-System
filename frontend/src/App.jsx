@@ -21,6 +21,7 @@ import SignUp from "./pages/SignUp";
 import Login from "./pages/Login";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import TaskProgressPage from "./pages/TaskProgressPage";
+import Charts from "./components/Charts";
 
 
 const App = () => {
@@ -49,6 +50,7 @@ const App = () => {
           <Route path="/add-item" element={<AddItem />} />
           <Route path="/recipe-suggestions" element={<RecipeGenerator />} />
           <Route path="/task-progress" element={<TaskProgressPage />} />
+          <Route path="/charts" element={<Charts />} />
         </Route>
         {/* Catch-all for unrecognized routes */}
         <Route path="*" element={<Navigate to="/login" />} />

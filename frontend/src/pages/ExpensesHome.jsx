@@ -8,6 +8,7 @@ const ExpensesHome = () => {
   const [selectedMonth, setSelectedMonth] = useState("");
   const [categoryData, setCategoryData] = useState([]);
   const [totalAmount, setTotalAmount] = useState(0);
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     fetchExpenses();
@@ -22,17 +23,26 @@ const ExpensesHome = () => {
   const fetchExpenses = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:4000/expenses");
+
+      const response = await fetch("http://localhost:4000/expenses", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`, // Add the token to authenticate the request
+        },
+      });
+
       if (!response.ok) throw new Error("Failed to fetch data");
+
       const data = await response.json();
       setExpenses(data);
-      setLoading(false);
     } catch (error) {
       console.error("Error fetching expenses:", error);
       setError("Failed to load expenses. Please try again.");
+    } finally {
       setLoading(false);
     }
-  };
+};
+
 
   const processDataForChart = () => {
     // Filter expenses by selected month if any

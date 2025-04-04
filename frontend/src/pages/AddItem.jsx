@@ -23,6 +23,7 @@ const AddItem = () => {
   const [loading, setLoading] = useState(false);         // Tracks form submission status
   const [errorMessage, setErrorMessage] = useState("");  // Stores error messages
   const [successMessage, setSuccessMessage] = useState(""); // Stores success messages
+  const token = localStorage.getItem("token");
 
   /**
    * Handle form submission
@@ -44,6 +45,10 @@ const AddItem = () => {
         priority: data.priority,
         store: data.store,
         estimatedPrice: parseFloat(data.estimatedPrice),
+      },{
+        headers: {
+          Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+        },
       });
 
       // Show success message and reset form

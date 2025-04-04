@@ -8,28 +8,29 @@ import {
   getShoppingItemsByStore,
   updateShoppingListItemById,
 } from "../controllers/shoppingListController.js";
+import AuthenticateUser from "../middlewares/AuthenticateUser.js";
 
 const router = express.Router();
 
 // Route to get high-priority shopping list items
-router.get("/high-priority", getHighPriorityShoppingItems);
+router.get("/high-priority",AuthenticateUser, getHighPriorityShoppingItems);
 
 // Route to get shopping list items by store
-router.get("/store/:store", getShoppingItemsByStore);
+router.get("/store/:store",AuthenticateUser, getShoppingItemsByStore);
 
 // Route to add a new shopping list item
-router.post("/", addShoppingListItem);
+router.post("/",AuthenticateUser, addShoppingListItem);
 
 // Route to get all shopping list items
-router.get("/", getAllShoppingListItems);
+router.get("/",AuthenticateUser, getAllShoppingListItems);
 
 // Route to get a specific shopping list item by ID
-router.get("/:id", getShoppingListItemById);
+router.get("/:id",AuthenticateUser, getShoppingListItemById);
 
 // Route to update a shopping list item by ID
-router.put("/:id", updateShoppingListItemById);
+router.put("/:id",AuthenticateUser, updateShoppingListItemById);
 
 // Route to delete a shopping list item by ID
-router.delete("/:id", deleteShoppingListItemById);
+router.delete("/:id",AuthenticateUser, deleteShoppingListItemById);
 
 export default router;

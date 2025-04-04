@@ -30,6 +30,11 @@ const shoppingListSchema = new mongoose.Schema(
       required: true,
       min: 0, // Ensures price is non-negative
     },
+    user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "users", // Reference to the 'users' collection
+          required: true, // Ensure this field is always provided
+        },
   },
   { timestamps: true } // Adds createdAt and updatedAt fields automatically
 );

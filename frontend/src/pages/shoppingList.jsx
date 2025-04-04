@@ -12,6 +12,7 @@ const ShoppingList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const token = localStorage.getItem("token");
   
   // Modal state
   const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -33,7 +34,11 @@ const ShoppingList = () => {
   const fetchShoppingListItems = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:4000/shoppingList");
+      const response = await axios.get("http://localhost:4000/shoppingList",{
+        headers: {
+          Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+        },
+      });
       setShoppingItems(response.data);
     } catch (err) {
       setError(err.response?.data?.message || "Error fetching data");
@@ -55,7 +60,11 @@ const ShoppingList = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:4000/shoppingList/${id}`);
+          await axios.delete(`http://localhost:4000/shoppingList/${id}`,{
+            headers: {
+              Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+            },
+          });
           setShoppingItems((prevItems) => prevItems.filter((item) => item._id !== id));
           Swal.fire("Deleted!", "The item has been removed from your shopping list.", "success");
         } catch (error) {
@@ -68,7 +77,11 @@ const ShoppingList = () => {
   const fetchHighPriorityItems = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:4000/shoppingList/high-priority");
+      const response = await axios.get("http://localhost:4000/shoppingList/high-priority",{
+        headers: {
+          Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+        },
+      });
       setShoppingItems(response.data);
     } catch (error) {
       setError("Error fetching high-priority items.");
@@ -170,7 +183,11 @@ const ShoppingList = () => {
     if (!validateForm()) return;
     
     try {
-      await axios.put(`http://localhost:4000/shoppingList/${currentItem._id}`, formData);
+      await axios.put(`http://localhost:4000/shoppingList/${currentItem._id}`, formData,{
+        headers: {
+          Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+        },
+      });
       
       // Update the item in the local state
       setShoppingItems(prevItems =>

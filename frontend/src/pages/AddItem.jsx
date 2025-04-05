@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { 
   FaShoppingCart, FaStore, FaMoneyBillWave, FaList, 
-  FaBoxOpen, FaExclamationCircle, FaArrowLeft
+  FaBoxOpen, FaExclamationCircle, FaArrowLeft, FaRuler
 } from "react-icons/fa";
 
 const AddItem = () => {
@@ -41,6 +41,7 @@ const AddItem = () => {
       const response = await axios.post("http://localhost:4000/shoppingList", {
         itemName: data.itemName,
         quantity: Number(data.quantity),
+        unit: data.unit,
         category: data.category,
         priority: data.priority,
         store: data.store,
@@ -59,7 +60,11 @@ const AddItem = () => {
       setTimeout(() => navigate("/shoppingList"), 1500);
     } catch (error) {
       // Handle error case
-      setErrorMessage("Error adding item. Please try again.");
+      if (error.response && error.response.data) {
+        setErrorMessage(error.response.data.message || "Error adding item. Please try again.");
+      } else {
+        setErrorMessage("Error adding item. Please try again.");
+      }
     }
 
     // Reset loading state
@@ -130,7 +135,7 @@ const AddItem = () => {
             {errors.itemName && <p className="text-red-500 text-sm">{errors.itemName.message}</p>}
           </div>
 
-          {/* Two column layout for Quantity and Category */}
+          {/* Two column layout for Quantity and Unit */}
           <div className="grid grid-cols-2 gap-4">
             {/* Quantity Field */}
             <div className="space-y-2">
@@ -150,26 +155,46 @@ const AddItem = () => {
               {errors.quantity && <p className="text-red-500 text-sm">{errors.quantity.message}</p>}
             </div>
 
-            {/* Category Field */}
+            {/* Unit Field */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Category</label>
+              <label className="text-sm font-medium text-gray-700">Unit</label>
               <div className="relative">
-                <FaList className="absolute left-3 top-3 text-gray-500 text-lg" />
+                <FaRuler className="absolute left-3 top-3 text-gray-500 text-lg" />
                 <select
-                  {...register("category", { required: "Required" })}
+                  {...register("unit", { required: "Unit is required" })}
                   className="w-full px-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 shadow-sm text-gray-900 appearance-none"
                 >
                   <option value="">Select</option>
-                  <option value="Groceries">Groceries</option>
-                  <option value="Household">Household</option>
-                  <option value="Electronics">Electronics</option>
-                  <option value="Personal Care">Personal Care</option>
-                  <option value="Furniture">Furniture</option>
-                  <option value="Tools">Other</option>
+                  <option value="kg">kg</option>
+                  <option value="g">g</option>
+                  <option value="l">l</option>
+                  <option value="ml">ml</option>
+                  <option value="pieces">pieces</option>
                 </select>
               </div>
-              {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
+              {errors.unit && <p className="text-red-500 text-sm">{errors.unit.message}</p>}
             </div>
+          </div>
+
+          {/* Category Field - Moved below Quantity and Unit */}
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-gray-700">Category</label>
+            <div className="relative">
+              <FaList className="absolute left-3 top-3 text-gray-500 text-lg" />
+              <select
+                {...register("category", { required: "Required" })}
+                className="w-full px-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 shadow-sm text-gray-900 appearance-none"
+              >
+                <option value="">Select</option>
+                <option value="Groceries">Groceries</option>
+                <option value="Household">Household</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Personal Care">Personal Care</option>
+                <option value="Furniture">Furniture</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
           </div>
 
           {/* Priority Field - Radio Button Group */}

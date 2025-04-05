@@ -27,12 +27,6 @@ const ExpenseSideBar = ({ onSelectionChange }) => {
                     View Expenses 
                 </Link>
                 
-                <Link
-                    className={`w-full text-left px-4 py-2 rounded-lg ${selectedOption === 'Expenses Home' ? 'bg-blue-700' : 'bg-gray-700'}`}
-                    to="/monthlyBudget"
-                >
-                    Monthly Budget
-                </Link>
                 
             </div>
         </div>

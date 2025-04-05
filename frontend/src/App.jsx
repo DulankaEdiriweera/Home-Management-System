@@ -14,6 +14,7 @@ import ExpensesHome from "./pages/ExpensesHome";
 import ExpenseForm from "./pages/ExpensesForm";
 import MonthlyBudget from "./pages/MonthlyBudgetPage";
 
+import Dashboard from "./pages/sDashboard";
 import ShoppingList from "./pages/shoppingList";
 import AddItem from "./pages/AddItem";
 import RecipeGenerator from "./pages/RecipeGenerator";
@@ -46,6 +47,7 @@ const App = () => {
           <Route path="/expenses" element={<ExpensesHome />} />
           <Route path="/expensesAdd" element={<ExpenseForm />} />
           <Route path="/monthlyBudget" element={<MonthlyBudget />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/shoppingList" element={<ShoppingList />} />
           <Route path="/add-item" element={<AddItem />} />
           <Route path="/recipe-suggestions" element={<RecipeGenerator />} />

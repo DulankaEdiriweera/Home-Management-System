@@ -11,15 +11,20 @@ const shoppingListSchema = new mongoose.Schema(
       required: true,
       min: 1, // Ensures quantity is at least 1
     },
+    unit: {
+      type: String,
+      required: true,
+      enum: ["kg", "l", "ml", "g", "pieces"], // Allowed units of measure
+    },
     category: {
       type: String,
       required: true,
-      enum: ["Groceries", "Household", "Electronics", "personal Care", "Furniture", "Other"], // Adjust as needed
+      enum: ["Groceries", "Household", "Electronics", "Personal Care", "Furniture", "Other"], 
     },
     priority: {
       type: String,
       required: true,
-      enum: ["Low", "Medium", "High"], // Defines allowed priority values
+      enum: ["Low", "Medium", "High"],
     },
     store: {
       type: String,
@@ -28,15 +33,15 @@ const shoppingListSchema = new mongoose.Schema(
     estimatedPrice: {
       type: Number,
       required: true,
-      min: 0, // Ensures price is non-negative
+      min: 0,
     },
     user: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "users", // Reference to the 'users' collection
-          required: true, // Ensure this field is always provided
-        },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "users",
+      required: true,
+    },
   },
-  { timestamps: true } // Adds createdAt and updatedAt fields automatically
+  { timestamps: true }
 );
 
 const ShoppingList = mongoose.model("ShoppingList", shoppingListSchema);

@@ -207,7 +207,7 @@ const Dashboard = () => {
         {/* Navigation buttons */}
         <div className="flex justify-end mb-6">
           <button
-            onClick={() => navigate("/shopping-list")}
+            onClick={() => navigate("/shoppingList")}
             className="bg-blue-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-blue-700 shadow-md transition-all duration-200 flex items-center gap-2"
           >
             <FaShoppingCart /> View Shopping List

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { FaSearch, FaFilePdf, FaEdit, FaTrash, FaShoppingCart, FaList, FaBoxOpen, FaExclamationCircle, FaDollarSign, FaTimes, FaPlus, FaFilter } from "react-icons/fa";
+import { FaSearch, FaFilePdf, FaEdit, FaTrash, FaShoppingCart, FaList, FaBoxOpen, FaExclamationCircle, FaDollarSign, FaTimes, FaPlus, FaFilter, FaRuler } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable"; 
@@ -20,6 +20,7 @@ const ShoppingList = () => {
   const [formData, setFormData] = useState({
     itemName: "",
     quantity: "",
+    unit: "",
     category: "",
     priority: "",
     estimatedPrice: "",
@@ -34,7 +35,7 @@ const ShoppingList = () => {
   const fetchShoppingListItems = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:4000/shoppingList",{
+      const response = await axios.get("http://localhost:4000/shoppingList", {
         headers: {
           Authorization: `Bearer ${token}`, // Add the token to the Authorization header
         },
@@ -60,7 +61,7 @@ const ShoppingList = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:4000/shoppingList/${id}`,{
+          await axios.delete(`http://localhost:4000/shoppingList/${id}`, {
             headers: {
               Authorization: `Bearer ${token}`, // Add the token to the Authorization header
             },
@@ -77,7 +78,7 @@ const ShoppingList = () => {
   const fetchHighPriorityItems = async () => {
     setLoading(true);
     try {
-      const response = await axios.get("http://localhost:4000/shoppingList/high-priority",{
+      const response = await axios.get("http://localhost:4000/shoppingList/high-priority", {
         headers: {
           Authorization: `Bearer ${token}`, // Add the token to the Authorization header
         },
@@ -90,15 +91,23 @@ const ShoppingList = () => {
     }
   };
 
+  const filteredItems = shoppingItems.filter((item) =>
+    [item.itemName, item.category, item.store, item.priority]
+      .filter(Boolean) // Removes undefined/null values
+      .some((field) => field.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  // Updated exportToPDF function to use filteredItems instead of shoppingItems
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(18);
     doc.text("Shopping List", 14, 15);
   
-    const tableColumn = ["Item Name", "Quantity", "Category", "Priority", "Store", "Estimated Price"];
-    const tableRows = shoppingItems.map((item) => [
+    const tableColumn = ["Item Name", "Quantity", "Unit", "Category", "Priority", "Store", "Estimated Price"];
+    const tableRows = filteredItems.map((item) => [
       item.itemName,
       item.quantity,
+      item.unit || "N/A",
       item.category,
       item.priority,
       item.store || "N/A",
@@ -114,6 +123,24 @@ const ShoppingList = () => {
       headStyles: { fillColor: [22, 101, 216], textColor: [255, 255, 255] },
     });
   
+    // Calculate total estimated price using filteredItems
+    const totalEstimatedPrice = filteredItems.reduce((total, item) => {
+      return total + (item.estimatedPrice ? parseFloat(item.estimatedPrice) : 0);
+    }, 0);
+  
+    // Get the final Y position after the table
+    const finalY = doc.lastAutoTable.finalY || 25;
+    
+    // Add a line separating the table from the total
+    doc.setDrawColor(22, 101, 216);
+    doc.setLineWidth(0.5);
+    doc.line(14, finalY + 10, 196, finalY + 10);
+    
+    // Add total estimated price
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Total Estimated Price: LKR ${totalEstimatedPrice.toFixed(2)}`, 14, finalY + 20);
+  
     doc.save("shopping-list.pdf");
   };
 
@@ -123,6 +150,7 @@ const ShoppingList = () => {
     setFormData({
       itemName: item.itemName,
       quantity: item.quantity,
+      unit: item.unit,
       category: item.category,
       priority: item.priority,
       estimatedPrice: item.estimatedPrice || "",
@@ -138,6 +166,7 @@ const ShoppingList = () => {
     setFormData({
       itemName: "",
       quantity: "",
+      unit: "",
       category: "",
       priority: "",
       estimatedPrice: "",
@@ -162,8 +191,10 @@ const ShoppingList = () => {
     if (!formData.itemName) errors.itemName = "Item Name is required";
     if (!formData.quantity) errors.quantity = "Quantity is required";
     else if (formData.quantity < 1) errors.quantity = "Quantity must be at least 1";
+    if (!formData.unit) errors.unit = "Unit is required";
     if (!formData.category) errors.category = "Category is required";
     if (!formData.priority) errors.priority = "Priority is required";
+    if (!formData.store) errors.store = "Store is required";
     if (!formData.estimatedPrice) errors.estimatedPrice = "Estimated Price is required";
     else if (!/^\d+(\.\d{1,2})?$/.test(formData.estimatedPrice)) {
       errors.estimatedPrice = "Enter a valid price (e.g., 100 or 100.50)";
@@ -183,7 +214,7 @@ const ShoppingList = () => {
     if (!validateForm()) return;
     
     try {
-      await axios.put(`http://localhost:4000/shoppingList/${currentItem._id}`, formData,{
+      await axios.put(`http://localhost:4000/shoppingList/${currentItem._id}`, formData, {
         headers: {
           Authorization: `Bearer ${token}`, // Add the token to the Authorization header
         },
@@ -202,12 +233,6 @@ const ShoppingList = () => {
       Swal.fire("Error!", "Failed to update the item.", "error");
     }
   };
-
-  const filteredItems = shoppingItems.filter((item) =>
-    [item.itemName, item.category, item.store, item.priority]
-      .filter(Boolean) // Removes undefined/null values
-      .some((field) => field.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
 
   const getPriorityColor = (priority) => {
     switch (priority) {
@@ -312,6 +337,7 @@ const ShoppingList = () => {
                   <tr>
                     <th className="py-3 px-4 text-left font-semibold text-white">Item Name</th>
                     <th className="py-3 px-4 text-left font-semibold text-white">Quantity</th>
+                    <th className="py-3 px-4 text-left font-semibold text-white">Unit</th>
                     <th className="py-3 px-4 text-left font-semibold text-white">Category</th>
                     <th className="py-3 px-4 text-left font-semibold text-white">Priority</th>
                     <th className="py-3 px-4 text-left font-semibold text-white">Store</th>
@@ -324,6 +350,7 @@ const ShoppingList = () => {
                     <tr key={item._id} className={`border-t border-gray-200 hover:bg-blue-50 transition-colors duration-150 ${index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}`}>
                       <td className="py-3 px-4 font-medium">{item.itemName}</td>
                       <td className="py-3 px-4">{item.quantity}</td>
+                      <td className="py-3 px-4">{item.unit}</td>
                       <td className="py-3 px-4">
                         <span className="bg-blue-100 text-blue-800 py-1 px-3 rounded-full text-xs">
                           {item.category}
@@ -402,21 +429,46 @@ const ShoppingList = () => {
                 {formErrors.itemName && <p className="text-red-500 text-sm mt-1">{formErrors.itemName}</p>}
               </div>
 
-              {/* Quantity */}
-              <div>
-                <label className="block text-gray-700 mb-2 font-medium">Quantity</label>
-                <div className="relative">
-                  <FaBoxOpen className="absolute left-3 top-3 text-gray-500" />
-                  <input
-                    type="number"
-                    name="quantity"
-                    value={formData.quantity}
-                    onChange={handleInputChange}
-                    className="w-full px-10 py-2 border rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-200"
-                    placeholder="Enter quantity"
-                  />
+              {/* Quantity and Unit in a 2-column layout */}
+              <div className="grid grid-cols-2 gap-4">
+                {/* Quantity */}
+                <div>
+                  <label className="block text-gray-700 mb-2 font-medium">Quantity</label>
+                  <div className="relative">
+                    <FaBoxOpen className="absolute left-3 top-3 text-gray-500" />
+                    <input
+                      type="number"
+                      name="quantity"
+                      value={formData.quantity}
+                      onChange={handleInputChange}
+                      className="w-full px-10 py-2 border rounded-xl focus:ring-2 focus:ring-blue-400 focus:outline-none transition-all duration-200"
+                      placeholder="Enter quantity"
+                    />
+                  </div>
+                  {formErrors.quantity && <p className="text-red-500 text-sm mt-1">{formErrors.quantity}</p>}
                 </div>
-                {formErrors.quantity && <p className="text-red-500 text-sm mt-1">{formErrors.quantity}</p>}
+
+                {/* Unit */}
+                <div>
+                  <label className="block text-gray-700 mb-2 font-medium">Unit</label>
+                  <div className="relative">
+                    <FaRuler className="absolute left-3 top-3 text-gray-500" />
+                    <select
+                      name="unit"
+                      value={formData.unit}
+                      onChange={handleInputChange}
+                      className="w-full px-10 py-2 border rounded-xl focus:ring-2 focus:ring-blue-400 appearance-none focus:outline-none transition-all duration-200"
+                    >
+                      <option value="">Select Unit</option>
+                      <option value="kg">kg</option>
+                      <option value="g">g</option>
+                      <option value="l">l</option>
+                      <option value="ml">ml</option>
+                      <option value="pieces">pieces</option>
+                    </select>
+                  </div>
+                  {formErrors.unit && <p className="text-red-500 text-sm mt-1">{formErrors.unit}</p>}
+                </div>
               </div>
 
               {/* Category */}
@@ -462,9 +514,9 @@ const ShoppingList = () => {
                 {formErrors.priority && <p className="text-red-500 text-sm mt-1">{formErrors.priority}</p>}
               </div>
 
-              {/* Store (Optional) */}
+              {/* Store */}
               <div>
-                <label className="block text-gray-700 mb-2 font-medium">Store (Optional)</label>
+                <label className="block text-gray-700 mb-2 font-medium">Store</label>
                 <div className="relative">
                   <FaShoppingCart className="absolute left-3 top-3 text-gray-500" />
                   <input
@@ -476,6 +528,7 @@ const ShoppingList = () => {
                     placeholder="Enter store name"
                   />
                 </div>
+                {formErrors.store && <p className="text-red-500 text-sm mt-1">{formErrors.store}</p>}
               </div>
 
               {/* Estimated Price */}

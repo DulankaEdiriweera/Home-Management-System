@@ -90,7 +90,7 @@ const Header = () => {
           </li>
           <li>
             <Link
-              to="/shoppingList"
+              to="/dashboard"
               className={`font-medium hover:text-blue-500 cursor-pointer transition-colors pb-1 ${
                 currentPath === "/shoppingList"
                   ? "border-b-2 border-blue-500 text-blue-500"

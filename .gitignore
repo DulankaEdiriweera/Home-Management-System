@@ -1,0 +1,5 @@
+# Ignore SonarQube files and folders
+.sonar/
+sonar-project.properties
+# Ignore SonarQube scan work directory
+.scannerwork/

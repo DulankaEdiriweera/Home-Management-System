@@ -1,5 +1,6 @@
 # Home-Management-System
 🏡 Home Management System
+
 The Home Management System is a web-based application built using the MERN stack (MongoDB, Express.js, React.js, Node.js). It helps users efficiently manage and organize their household activities, all in one place.
 
 ✨ Key Features

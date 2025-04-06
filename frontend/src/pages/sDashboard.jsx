@@ -5,8 +5,6 @@ import {
   FaShoppingCart, 
   FaExclamationCircle, 
   FaDollarSign, 
-  FaStore, 
-  FaBoxOpen, 
   FaList,
   FaArrowUp,
   FaArrowDown
@@ -117,7 +115,8 @@ const Dashboard = () => {
   const prepareTopExpensiveItemsData = () => {
     return stats.topExpensiveItems.map(item => ({
       name: item.itemName,
-      price: parseFloat(item.estimatedPrice)
+      price: parseFloat(item.estimatedPrice),
+      id: item.id // Assuming items have an id property
     }));
   };
 
@@ -142,12 +141,14 @@ const Dashboard = () => {
   // Cards data
   const infoCards = [
     {
+      id: "total-items",
       title: "Total Items",
       value: stats.totalItems,
       icon: <FaShoppingCart className="text-blue-500 text-3xl" />,
       color: "bg-blue-100 text-blue-800",
     },
     {
+      id: "high-priority",
       title: "High Priority",
       value: stats.highPriorityItems,
       percentage: stats.totalItems ? Math.round((stats.highPriorityItems / stats.totalItems) * 100) : 0,
@@ -155,12 +156,14 @@ const Dashboard = () => {
       color: "bg-red-100 text-red-800",
     },
     {
+      id: "categories",
       title: "Categories",
       value: Object.keys(stats.categoriesCount).length,
       icon: <FaList className="text-purple-500 text-3xl" />,
       color: "bg-purple-100 text-purple-800",
     },
     {
+      id: "total-estimated",
       title: "Total Estimated",
       value: `LKR ${stats.totalEstimatedPrice.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
       icon: <FaDollarSign className="text-green-500 text-3xl" />,
@@ -216,9 +219,9 @@ const Dashboard = () => {
 
         {/* Info Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {infoCards.map((card, index) => (
+          {infoCards.map((card) => (
             <div 
-              key={index} 
+              key={card.id}
               className={`p-6 rounded-xl shadow-md border-l-4 ${card.color} border-l-${card.color.split(" ")[0].replace('bg-', '')}-500`}
             >
               <div className="flex justify-between items-center">
@@ -264,8 +267,8 @@ const Dashboard = () => {
                       nameKey="name"
                       label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                     >
-                      {prepareCategoryChartData().map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={CATEGORY_COLORS[index % CATEGORY_COLORS.length]} />
+                      {prepareCategoryChartData().map((entry) => (
+                        <Cell key={`category-${entry.name}`} fill={CATEGORY_COLORS[prepareCategoryChartData().findIndex(item => item.name === entry.name) % CATEGORY_COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value) => [`${value} items`, 'Count']} />
@@ -299,7 +302,7 @@ const Dashboard = () => {
                       label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                     >
                       {preparePriorityChartData().map((entry) => (
-                        <Cell key={`cell-${entry.name}`} fill={PRIORITY_COLORS[entry.name]} />
+                        <Cell key={`priority-${entry.name}`} fill={PRIORITY_COLORS[entry.name]} />
                       ))}
                     </Pie>
                     <Tooltip formatter={(value) => [`${value} items`, 'Count']} />
@@ -331,7 +334,11 @@ const Dashboard = () => {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip formatter={(value) => [`LKR ${value.toFixed(2)}`, 'Price']} />
-                    <Bar dataKey="price" fill="#82ca9d" name="Price (LKR)" />
+                    <Bar dataKey="price" fill="#82ca9d" name="Price (LKR)">
+                      {prepareTopExpensiveItemsData().map((entry) => (
+                        <Cell key={`expense-${entry.id || entry.name}`} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -356,7 +363,11 @@ const Dashboard = () => {
                     <XAxis dataKey="name" />
                     <YAxis />
                     <Tooltip formatter={(value) => [`${value} items`, 'Count']} />
-                    <Bar dataKey="value" fill="#8884d8" name="Number of Items" />
+                    <Bar dataKey="value" fill="#8884d8" name="Number of Items">
+                      {prepareStoreCounts().map((entry) => (
+                        <Cell key={`store-${entry.name}`} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               ) : (

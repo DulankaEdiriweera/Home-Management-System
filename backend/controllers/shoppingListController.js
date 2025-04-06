@@ -4,7 +4,7 @@ import ShoppingList from "../models/shoppingListModel.js";
 export const addShoppingListItem = async (req, res) => {
   try {
     const userId = req.userId;
-    const { itemName, store, unit, quantity } = req.body;
+    const { itemName, store, unit } = req.body;
 
     // Validate that the provided unit is in the allowed enum
     if (!["kg", "l", "ml", "g", "pieces"].includes(unit)) {

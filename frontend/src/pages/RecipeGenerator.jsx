@@ -1,7 +1,5 @@
-// generate recipe
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaSave, FaSyncAlt } from "react-icons/fa";
 import Swal from "sweetalert2";
 import axios from "axios";
 import SideBarInventory from "../components/SideBarInventory";
@@ -12,7 +10,6 @@ const AutoRecipeGenerator = () => {
   const [expiringItems, setExpiringItems] = useState([]);
   const [generatedRecipes, setGeneratedRecipes] = useState([]);
   const [error, setError] = useState(null);
-  const [regenerating, setRegenerating] = useState(false);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -28,7 +25,7 @@ const AutoRecipeGenerator = () => {
       return;
     }
     fetchExpiringItemsAndGenerateRecipes();
-  }, []);
+  }, []);  // Run this effect once after the component mounts
 
   const fetchExpiringItemsAndGenerateRecipes = async () => {
     try {
@@ -99,7 +96,6 @@ const AutoRecipeGenerator = () => {
       }
     } finally {
       setLoading(false);
-      setRegenerating(false);
     }
   };
 
@@ -121,9 +117,9 @@ const AutoRecipeGenerator = () => {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            {expiringItems.map((item, index) => (
+            {expiringItems.map((item) => (
               <div
-                key={index}
+                key={item.itemId} // Replace index with unique ID (e.g., itemId)
                 className="bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm flex items-center"
               >
                 {item.itemName}
@@ -136,9 +132,9 @@ const AutoRecipeGenerator = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {generatedRecipes.map((recipe, index) => (
+          {generatedRecipes.map((recipe) => (
             <div
-              key={index}
+              key={recipe.id} // Replace index with unique ID (e.g., recipe.id)
               className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-transform duration-300 transform hover:scale-105"
             >
               {/* Recipe Title */}

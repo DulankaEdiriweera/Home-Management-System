@@ -32,8 +32,8 @@ const ExpenseTracker = () => {
       const response = await fetch("http://localhost:4000/expenses", {
         method: "GET",
         headers: {
-          Authorization: `Bearer ${token}`, // Add the token to the Authorization header
-          "Content-Type": "application/json", // Ensure proper content type
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
 
@@ -49,23 +49,30 @@ const ExpenseTracker = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.amount || !formData.month || !formData.date || !formData.category || !formData.paymentMethod || !formData.description) {
+    if (
+      !formData.amount ||
+      !formData.month ||
+      !formData.date ||
+      !formData.category ||
+      !formData.paymentMethod ||
+      !formData.description
+    ) {
       setError("All fields are required!");
       return;
     }
 
     try {
       setError(null);
-      const url = isUpdating 
-        ? `http://localhost:4000/expenses/${selectedExpenseId}` 
+      const url = isUpdating
+        ? `http://localhost:4000/expenses/${selectedExpenseId}`
         : "http://localhost:4000/expenses";
       const method = isUpdating ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // Add the token to the Authorization header
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       });
@@ -74,66 +81,62 @@ const ExpenseTracker = () => {
 
       // After successful submission, fetch fresh data
       await fetchExpenses();
-      
+
       setShowModal(false);
       resetForm();
     } catch (error) {
       console.error("Error submitting expense:", error);
       setError("Failed to submit. Please try again.");
     }
-};
+  };
 
-const handleDeleteClick = (id) => {
-  setExpenseToDelete(id);
-  setShowDeleteModal(true);
-};
+  const handleDeleteClick = (id) => {
+    setExpenseToDelete(id);
+    setShowDeleteModal(true);
+  };
 
-const handleDelete = async () => {
-  if (!expenseToDelete) {
-    console.error("No expense ID provided for deletion");
-    setError("No expense selected for deletion.");
-    return;
-  }
-
-  try {
-    console.log("Deleting expense with ID:", expenseToDelete); // Debugging
-
-    const response = await fetch(
-      `http://localhost:4000/expenses/${expenseToDelete}`,
-      {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    const responseData = await response.json(); // Read response
-
-    if (!response.ok) {
-      console.error("Error response from backend:", responseData);
-      throw new Error(responseData.message || "Failed to delete expense");
+  const handleDelete = async () => {
+    if (!expenseToDelete) {
+      console.error("No expense ID provided for deletion");
+      setError("No expense selected for deletion.");
+      return;
     }
 
-    console.log("Expense deleted successfully:", responseData);
-    await fetchExpenses();
-    setShowDeleteModal(false);
-    setExpenseToDelete(null);
-  } catch (error) {
-    console.error("Error deleting expense:", error);
-    setError(error.message);
-    setShowDeleteModal(false);
-  }
-};
+    try {
+      console.log("Deleting expense with ID:", expenseToDelete);
 
+      const response = await fetch(
+        `http://localhost:4000/expenses/${expenseToDelete}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
+      const responseData = await response.json();
 
+      if (!response.ok) {
+        console.error("Error response from backend:", responseData);
+        throw new Error(responseData.message || "Failed to delete expense");
+      }
+
+      console.log("Expense deleted successfully:", responseData);
+      await fetchExpenses();
+      setShowDeleteModal(false);
+      setExpenseToDelete(null);
+    } catch (error) {
+      console.error("Error deleting expense:", error);
+      setError(error.message);
+      setShowDeleteModal(false);
+    }
+  };
 
   const formatDateForInput = (dateString) => {
-    // Convert date string to YYYY-MM-DD format for the input
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return ""; // Return empty if invalid date
+      if (isNaN(date.getTime())) return "";
 
       return date.toISOString().split("T")[0];
     } catch (error) {
@@ -142,14 +145,11 @@ const handleDelete = async () => {
     }
   };
 
-  
-  
-
   const handleUpdateClick = (expense) => {
     setFormData({
       amount: expense.amount,
       month: expense.month,
-      date: formatDateForInput(expense.date), // Format date for input element
+      date: formatDateForInput(expense.date),
       category: expense.category,
       paymentMethod: expense.paymentMethod,
       description: expense.description,
@@ -181,11 +181,9 @@ const handleDelete = async () => {
 
   const getCurrentYear = () => new Date().getFullYear();
 
-  // Get the last day of the selected month
   const getLastDayOfMonth = (monthName) => {
     const monthNumber = getMonthNumber(monthName);
     const year = getCurrentYear();
-    // Create a date for the first day of the next month, then subtract one day
     const lastDay = new Date(year, parseInt(monthNumber), 0).getDate();
     return lastDay.toString().padStart(2, "0");
   };
@@ -194,14 +192,12 @@ const handleDelete = async () => {
     const { name, value } = e.target;
 
     if (name === "month") {
-      // When month changes, reset the date field
       setFormData((prev) => ({
         ...prev,
         month: value,
         date: "",
       }));
     } else if (name === "amount") {
-      // Only allow positive numbers for amount field
       if (value === "" || (!isNaN(value) && parseFloat(value) >= 0)) {
         setFormData((prev) => ({
           ...prev,
@@ -221,16 +217,14 @@ const handleDelete = async () => {
     resetForm();
   };
 
-  // Format number as LKR
   const formatAsLKR = (amount) => {
-    return new Intl.NumberFormat("LK", {
+    return new Intl.NumberFormat("en-LK", {
       style: "currency",
       currency: "LKR",
       minimumFractionDigits: 2,
     }).format(amount);
   };
 
-  // Filter expenses based on search query (category only) and month
   const filteredExpenses = expenses.filter(
     (expense) =>
       (searchQuery === "" ||
@@ -238,15 +232,12 @@ const handleDelete = async () => {
       (searchMonth === "" || expense.month === searchMonth)
   );
 
-  // Calculate total amount
   const totalAmount = filteredExpenses.reduce(
     (total, expense) => total + parseFloat(expense.amount),
     0
   );
 
-  // Generate PDF report using client-side JavaScript
   const generatePDF = () => {
-    // Create a printable version of the data
     const printWindow = window.open("", "_blank", "height=600,width=800");
 
     if (!printWindow) {
@@ -254,7 +245,6 @@ const handleDelete = async () => {
       return;
     }
 
-    // Generate HTML content for printing
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -309,7 +299,7 @@ const handleDelete = async () => {
               .join("")}
             <tr class="total-row">
               <td>${formatAsLKR(totalAmount)}</td>
-              <td colspan="5">Total</td>
+              <td colSpan="5">Total</td>
             </tr>
           </tbody>
         </table>
@@ -320,9 +310,7 @@ const handleDelete = async () => {
         </div>
         
         <script>
-          // Auto-trigger print dialog when the page loads
           window.onload = function() {
-            // Small delay to ensure content is fully loaded
             setTimeout(() => {
               window.print();
             }, 500);
@@ -332,7 +320,6 @@ const handleDelete = async () => {
       </html>
     `;
 
-    // Write the HTML content to the new window
     printWindow.document.write(htmlContent);
     printWindow.document.close();
   };
@@ -392,14 +379,12 @@ const handleDelete = async () => {
           </div>
         </div>
 
-        {/* Error message */}
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
           </div>
         )}
 
-        {/* Expense Table */}
         <div className="overflow-x-auto" ref={printRef}>
           <table className="w-full border border-gray-300 text-center rounded-lg overflow-hidden">
             <thead>
@@ -469,7 +454,6 @@ const handleDelete = async () => {
           </table>
         </div>
 
-        {/* Add/Edit Expense Modal */}
         {showModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -656,7 +640,6 @@ const handleDelete = async () => {
           </div>
         )}
 
-        {/* Delete Confirmation Modal */}
         {showDeleteModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">

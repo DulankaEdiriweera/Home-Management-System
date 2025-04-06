@@ -49,21 +49,28 @@ const ExpenseTracker = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.amount || !formData.month || !formData.date || !formData.category || !formData.paymentMethod || !formData.description) {
+    if (
+      !formData.amount ||
+      !formData.month ||
+      !formData.date ||
+      !formData.category ||
+      !formData.paymentMethod ||
+      !formData.description
+    ) {
       setError("All fields are required!");
       return;
     }
 
     try {
       setError(null);
-      const url = isUpdating 
-        ? `http://localhost:4000/expenses/${selectedExpenseId}` 
+      const url = isUpdating
+        ? `http://localhost:4000/expenses/${selectedExpenseId}`
         : "http://localhost:4000/expenses";
       const method = isUpdating ? "PUT" : "POST";
 
       const response = await fetch(url, {
         method,
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
@@ -74,7 +81,7 @@ const ExpenseTracker = () => {
 
       // After successful submission, fetch fresh data
       await fetchExpenses();
-      
+
       setShowModal(false);
       resetForm();
     } catch (error) {

@@ -1,13 +1,11 @@
 import React from 'react'
 import { NavLink } from "react-router-dom";
-import { IoFastFood } from "react-icons/io5";
-import { MdOutlineInventory } from "react-icons/md";
+import { IoFastFood, IoBarChartSharp } from "react-icons/io5";
+import { MdOutlineInventory, MdChair } from "react-icons/md";
 import { TbHandSanitizer } from "react-icons/tb";
-import { GiMedicinePills } from "react-icons/gi";
-import { MdChair } from "react-icons/md";
+import { GiMedicinePills,GiHotMeal } from "react-icons/gi";
 import { FaTools } from "react-icons/fa";
-import { GiHotMeal } from "react-icons/gi";
-import { IoBarChartSharp } from "react-icons/io5";
+import PropTypes from 'prop-types';
 
 const SideBarInventory = () => {
   return (
@@ -76,6 +74,12 @@ const SidebarItem = ({ to, icon, label }) => {
       <span className="text-xl">{label}</span>
     </NavLink>
   );
+};
+
+SidebarItem.propTypes = {
+  to: PropTypes.string.isRequired,
+  icon: PropTypes.node.isRequired,
+  label: PropTypes.string.isRequired,
 };
 
 export default SideBarInventory

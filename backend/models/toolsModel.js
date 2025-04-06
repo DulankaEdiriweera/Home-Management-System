@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import users from "../models/userModel.js";
 
 const toolsAndMaintainenceItemsSchema = new mongoose.Schema(
   {

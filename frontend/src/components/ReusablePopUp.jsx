@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 const ReusablePopUp = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
@@ -21,6 +22,13 @@ const ReusablePopUp = ({ isOpen, onClose, title, children }) => {
       </div>
     </div>
   );
+};
+
+ReusablePopUp.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  title: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
 };
 
 export default ReusablePopUp;

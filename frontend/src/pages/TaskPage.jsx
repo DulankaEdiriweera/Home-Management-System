@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import MiniSideBar_Task from "../components/MiniSideBar_Task";
+import MiniSideBarTask from "../components/MiniSideBarTask"
 import axios from "axios";
 import Swal from "sweetalert2";
 import jsPDF from "jspdf";
@@ -23,8 +23,8 @@ const TaskPage = () => {
         status: "",
         completed: false,
     });
-    const [taskCount, setTaskCount] = useState(5);
-    const [message, setMessage] = useState("");
+    const [taskCount] = useState(5);
+    const [message] = useState("");
     const [filters, setFilters] = useState({
         category: 'All',
         status: '',
@@ -40,6 +40,32 @@ const TaskPage = () => {
         status: "",
 
     });
+
+    const getPriorityClass = (priority) => {
+        switch (priority) {
+            case "Low":
+                return "bg-yellow-300";
+            case "Medium":
+                return "bg-green-300";
+            case "High":
+                return "bg-red-300";
+            default:
+                return "bg-gray-300"; // Fallback color
+        }
+    };
+
+    const getStatusTextClass = (status) => {
+        switch (status) {
+            case "Completed":
+                return "text-green-600";
+            case "In Progress":
+                return "text-yellow-600";
+            case "Not Started":
+                return "text-gray-500";
+            default:
+                return "text-gray-600";
+        }
+    };
 
     // Calculate today's date for min attribute on date input
     const getTodayDate = () => {
@@ -109,12 +135,11 @@ const TaskPage = () => {
         if (filters.search && filters.search.trim() !== '') {
             const searchTerm = filters.search.toLowerCase().trim();
             result = result.filter(task =>
-                (task.title && task.title.toLowerCase().includes(searchTerm)) ||
-                (task.category && task.category.toLowerCase().includes(searchTerm)) ||
-                (task.description && task.description.toLowerCase().includes(searchTerm))
+                task.title?.toLowerCase().includes(searchTerm) ||
+                task.category?.toLowerCase().includes(searchTerm) ||
+                task.description?.toLowerCase().includes(searchTerm)
             );
         }
-
         setFilteredTasks(result);
     };
 
@@ -526,7 +551,7 @@ const TaskPage = () => {
     };
     return (
         <div className="flex p-2 min-h-screen">
-            <MiniSideBar_Task onFilterChange={handleFilterChange} />
+            <MiniSideBarTask onFilterChange={handleFilterChange} />
             <div className="flex-1 p-6 bg-gray-200 h-screen rounded-2xl ml-4 overflow-hidden">
                 <h1 className="text-3xl font-semibold mb-6">Task List</h1>
                 <div className="flex items-center justify-between p-5">
@@ -622,21 +647,29 @@ const TaskPage = () => {
                             <h2 className="text-xl font-semibold mb-4">Add New Task</h2>
                             <form onSubmit={handleAddTask}>
                                 <div className="mb-3">
-                                    <label className="block mb-1">Title</label>
+                                    <label className="block mb-1 text-sm font-medium text-gray-700" htmlFor="title">
+                                        Title
+                                    </label>
                                     <input
+                                        id="title"
                                         type="text"
                                         name="title"
                                         placeholder="Add Title"
                                         value={newTask.title}
                                         onChange={handleInputChange}
-                                        className={`w-full p-2 border rounded ${formErrors.title ? 'border-red-500' : ''}`}
+                                        className={`w-full p-2 border rounded ${formErrors.title ? 'border-red-500' : 'border-gray-300'
+                                            }`}
                                     />
-                                    {formErrors.title && <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>}
+                                    {formErrors.title && (
+                                        <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>
+                                    )}
                                 </div>
 
+
                                 <div className="mb-3">
-                                    <label className="block mb-1">Category</label>
+                                    <label htmlFor="category" className="block mb-1">Category</label>
                                     <select
+                                        id="category"
                                         name="category"
                                         value={newTask.category}
                                         onChange={handleInputChange}
@@ -649,24 +682,32 @@ const TaskPage = () => {
                                         <option value="Billing">Billing</option>
                                         <option value="Other">Other</option>
                                     </select>
-                                    {formErrors.category && <p className="text-red-500 text-sm mt-1">{formErrors.category}</p>}
+                                    {formErrors.category && (
+                                        <p className="text-red-500 text-sm mt-1">{formErrors.category}</p>
+                                    )}
                                 </div>
 
+
                                 <div className="mb-3">
-                                    <label className="block mb-1">Description</label>
+                                    <label htmlFor="description" className="block mb-1">Description</label>
                                     <textarea
+                                        id="description"
                                         name="description"
                                         placeholder="Add Description"
                                         value={newTask.description}
                                         onChange={handleInputChange}
                                         className={`w-full p-2 border rounded ${formErrors.description ? 'border-red-500' : ''}`}
                                     />
-                                    {formErrors.description && <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>}
+                                    {formErrors.description && (
+                                        <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>
+                                    )}
                                 </div>
 
+
                                 <div className="mb-3">
-                                    <label className="block mb-1">Due Date</label>
+                                    <label htmlFor="dueDate" className="block mb-1">Due Date</label>
                                     <input
+                                        id="dueDate"
                                         type="date"
                                         name="dueDate"
                                         value={newTask.dueDate}
@@ -674,12 +715,16 @@ const TaskPage = () => {
                                         min={getTodayDate()}
                                         className={`w-full p-2 border rounded ${formErrors.dueDate ? 'border-red-500' : ''}`}
                                     />
-                                    {formErrors.dueDate && <p className="text-red-500 text-sm mt-1">{formErrors.dueDate}</p>}
+                                    {formErrors.dueDate && (
+                                        <p className="text-red-500 text-sm mt-1">{formErrors.dueDate}</p>
+                                    )}
                                 </div>
 
+
                                 <div className="mb-3">
-                                    <label className="block mb-1">Priority</label>
+                                    <label htmlFor="priority" className="block mb-1">Priority</label>
                                     <select
+                                        id="priority"
                                         name="priority"
                                         value={newTask.priority}
                                         onChange={handleInputChange}
@@ -690,12 +735,16 @@ const TaskPage = () => {
                                         <option value="Medium">Medium</option>
                                         <option value="High">High</option>
                                     </select>
-                                    {formErrors.priority && <p className="text-red-500 text-sm mt-1">{formErrors.priority}</p>}
+                                    {formErrors.priority && (
+                                        <p className="text-red-500 text-sm mt-1">{formErrors.priority}</p>
+                                    )}
                                 </div>
 
+
                                 <div className="mb-3">
-                                    <label className="block mb-1">Status</label>
+                                    <label htmlFor="status" className="block mb-1">Status</label>
                                     <select
+                                        id="status"
                                         name="status"
                                         value={newTask.status}
                                         onChange={handleInputChange}
@@ -706,8 +755,11 @@ const TaskPage = () => {
                                         <option value="In Progress">In Progress</option>
                                         <option value="Completed">Completed</option>
                                     </select>
-                                    {formErrors.status && <p className="text-red-500 text-sm mt-1">{formErrors.status}</p>}
+                                    {formErrors.status && (
+                                        <p className="text-red-500 text-sm mt-1">{formErrors.status}</p>
+                                    )}
                                 </div>
+
 
                                 {/* Buttons */}
                                 <div className="flex justify-between mt-4">
@@ -741,8 +793,9 @@ const TaskPage = () => {
                             <h2 className="text-xl font-semibold mb-4">Edit Task</h2>
                             <form onSubmit={handleEditTask}>
                                 <div className="mb-3">
-                                    <label className="block mb-1">Title</label>
+                                    <label htmlFor="title" className="block mb-1">Title</label>
                                     <input
+                                        id="title"
                                         type="text"
                                         name="title"
                                         placeholder="Edit Title"
@@ -750,12 +803,15 @@ const TaskPage = () => {
                                         onChange={handleEditInputChange}
                                         className={`w-full p-2 border rounded ${formErrors.title ? 'border-red-500' : ''}`}
                                     />
-                                    {formErrors.title && <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>}
+                                    {formErrors.title && (
+                                        <p className="text-red-500 text-sm mt-1">{formErrors.title}</p>
+                                    )}
                                 </div>
 
                                 <div className="mb-3">
-                                    <label className="block mb-1">Category</label>
+                                    <label htmlFor="category" className="block mb-1">Category</label>
                                     <select
+                                        id="category"
                                         name="category"
                                         value={editTask?.category || ''}
                                         onChange={handleEditInputChange}
@@ -771,9 +827,11 @@ const TaskPage = () => {
                                     {formErrors.category && <p className="text-red-500 text-sm mt-1">{formErrors.category}</p>}
                                 </div>
 
+
                                 <div className="mb-3">
-                                    <label className="block mb-1">Description</label>
+                                    <label htmlFor="description" className="block mb-1">Description</label>
                                     <textarea
+                                        id="description"
                                         name="description"
                                         placeholder="Edit Description"
                                         value={editTask?.description || ''}
@@ -783,9 +841,11 @@ const TaskPage = () => {
                                     {formErrors.description && <p className="text-red-500 text-sm mt-1">{formErrors.description}</p>}
                                 </div>
 
+
                                 <div className="mb-3">
-                                    <label className="block mb-1">Due Date</label>
+                                    <label htmlFor="dueDate" className="block mb-1">Due Date</label>
                                     <input
+                                        id="dueDate"
                                         type="date"
                                         name="dueDate"
                                         value={editTask?.dueDate ? formatDateForInput(editTask.dueDate) : ''}
@@ -796,9 +856,11 @@ const TaskPage = () => {
                                     {formErrors.dueDate && <p className="text-red-500 text-sm mt-1">{formErrors.dueDate}</p>}
                                 </div>
 
+
                                 <div className="mb-3">
-                                    <label className="block mb-1">Priority</label>
+                                    <label htmlFor="priority" className="block mb-1">Priority</label>
                                     <select
+                                        id="priority"
                                         name="priority"
                                         value={editTask?.priority || ''}
                                         onChange={handleEditInputChange}
@@ -813,8 +875,9 @@ const TaskPage = () => {
                                 </div>
 
                                 <div className="mb-3">
-                                    <label className="block mb-1">Status</label>
+                                    <label htmlFor="status" className="block mb-1">Status</label>
                                     <select
+                                        id="status"
                                         name="status"
                                         value={editTask?.status || ''}
                                         onChange={handleEditInputChange}
@@ -827,6 +890,7 @@ const TaskPage = () => {
                                     </select>
                                     {formErrors.status && <p className="text-red-500 text-sm mt-1">{formErrors.status}</p>}
                                 </div>
+
 
                                 {/* Buttons */}
                                 <div className="flex justify-between mt-4">
@@ -875,19 +939,14 @@ const TaskPage = () => {
                                     <p className="mt-2 text-sm text-gray-500">
                                         <strong>Due Date:</strong> {formatDate(task.dueDate)}
                                     </p>
-                                    <div
-                                        className={`p-2 text-white text-center rounded mt-2 ${task.priority === "Low"
-                                            ? "bg-yellow-300"
-                                            : task.priority === "Medium"
-                                                ? "bg-green-300"
-                                                : "bg-red-300"
-                                            }`}
-                                    >
+                                    <div className={`p-2 text-white text-center rounded mt-2 ${getPriorityClass(task.priority)}`}>
                                         {task.priority} Priority
                                     </div>
-                                    <p className={`mt-2 text-sm ${task.status === "Completed" ? "text-green-600" : task.status === "In Progress" ? "text-yellow-600" : "text-gray-600"}`}>
+
+                                    <p className={`mt-2 text-sm ${getStatusTextClass(task.status)}`}>
                                         <strong>Status:</strong> {task.status}
                                     </p>
+
 
                                     <div className="flex justify-between items-center mt-4">
                                         <button

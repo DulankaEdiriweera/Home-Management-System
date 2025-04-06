@@ -37,8 +37,8 @@ const AddItem = () => {
     setSuccessMessage("");
 
     try {
-      // Send POST request to backend API
-      const response = await axios.post("http://localhost:4000/shoppingList", {
+      // Send POST request to backend API without storing the response
+      await axios.post("http://localhost:4000/shoppingList", {
         itemName: data.itemName,
         quantity: Number(data.quantity),
         unit: data.unit,
@@ -59,12 +59,8 @@ const AddItem = () => {
       // Redirect to shopping list page after a short delay
       setTimeout(() => navigate("/shoppingList"), 1500);
     } catch (error) {
-      // Handle error case
-      if (error.response && error.response.data) {
-        setErrorMessage(error.response.data.message || "Error adding item. Please try again.");
-      } else {
-        setErrorMessage("Error adding item. Please try again.");
-      }
+      // Handle error case with optional chaining
+      setErrorMessage(error.response?.data?.message || "Error adding item. Please try again.");
     }
 
     // Reset loading state
@@ -119,12 +115,13 @@ const AddItem = () => {
           
           {/* Item Name Field */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Item Name</label>
+            <label htmlFor="itemName" className="text-sm font-medium text-gray-700">Item Name</label>
             <div className="relative">
               {/* Icon */}
               <FaShoppingCart className="absolute left-3 top-3 text-gray-500 text-lg" />
               {/* Input with validation */}
               <input
+                id="itemName"
                 {...register("itemName", { required: "Item Name is required" })}
                 type="text"
                 placeholder="Enter item name"
@@ -139,10 +136,11 @@ const AddItem = () => {
           <div className="grid grid-cols-2 gap-4">
             {/* Quantity Field */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Quantity</label>
+              <label htmlFor="quantity" className="text-sm font-medium text-gray-700">Quantity</label>
               <div className="relative">
                 <FaBoxOpen className="absolute left-3 top-3 text-gray-500 text-lg" />
                 <input
+                  id="quantity"
                   {...register("quantity", { 
                     required: "Required", 
                     min: { value: 1, message: "Quantity must be at least 1" } 
@@ -157,10 +155,11 @@ const AddItem = () => {
 
             {/* Unit Field */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Unit</label>
+              <label htmlFor="unit" className="text-sm font-medium text-gray-700">Unit</label>
               <div className="relative">
                 <FaRuler className="absolute left-3 top-3 text-gray-500 text-lg" />
                 <select
+                  id="unit"
                   {...register("unit", { required: "Unit is required" })}
                   className="w-full px-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 shadow-sm text-gray-900 appearance-none"
                 >
@@ -178,10 +177,11 @@ const AddItem = () => {
 
           {/* Category Field - Moved below Quantity and Unit */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Category</label>
+            <label htmlFor="category" className="text-sm font-medium text-gray-700">Category</label>
             <div className="relative">
               <FaList className="absolute left-3 top-3 text-gray-500 text-lg" />
               <select
+                id="category"
                 {...register("category", { required: "Required" })}
                 className="w-full px-10 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-400 focus:border-blue-400 shadow-sm text-gray-900 appearance-none"
               >
@@ -199,48 +199,52 @@ const AddItem = () => {
 
           {/* Priority Field - Radio Button Group */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Priority</label>
+            <p className="text-sm font-medium text-gray-700">Priority</p>
             <div className="flex space-x-4">
               {/* Low Priority Option */}
-              <label className="flex items-center">
+              <div className="flex items-center">
                 <input
+                  id="priority-low"
                   {...register("priority", { required: "Priority is required" })}
                   type="radio"
                   value="Low"
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="ml-2 text-gray-700">Low</span>
-              </label>
+                <label htmlFor="priority-low" className="ml-2 text-gray-700">Low</label>
+              </div>
               {/* Medium Priority Option */}
-              <label className="flex items-center">
+              <div className="flex items-center">
                 <input
+                  id="priority-medium"
                   {...register("priority")}
                   type="radio"
                   value="Medium"
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="ml-2 text-gray-700">Medium</span>
-              </label>
+                <label htmlFor="priority-medium" className="ml-2 text-gray-700">Medium</label>
+              </div>
               {/* High Priority Option */}
-              <label className="flex items-center">
+              <div className="flex items-center">
                 <input
+                  id="priority-high"
                   {...register("priority")}
                   type="radio"
                   value="High"
                   className="h-4 w-4 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="ml-2 text-gray-700">High</span>
-              </label>
+                <label htmlFor="priority-high" className="ml-2 text-gray-700">High</label>
+              </div>
             </div>
             {errors.priority && <p className="text-red-500 text-sm">{errors.priority.message}</p>}
           </div>
 
           {/* Store Field */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Store</label>
+            <label htmlFor="store" className="text-sm font-medium text-gray-700">Store</label>
             <div className="relative">
               <FaStore className="absolute left-3 top-3 text-gray-500 text-lg" />
               <input
+                id="store"
                 {...register("store", { required: "Store is required" })}
                 type="text"
                 placeholder="Where to buy"
@@ -252,10 +256,11 @@ const AddItem = () => {
 
           {/* Estimated Price Field */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">Estimated Price</label>
+            <label htmlFor="estimatedPrice" className="text-sm font-medium text-gray-700">Estimated Price</label>
             <div className="relative">
               <FaMoneyBillWave className="absolute left-3 top-3 text-gray-500 text-lg" />
               <input
+                id="estimatedPrice"
                 {...register("estimatedPrice", { 
                   required: "Price is required", 
                   min: { value: 0.01, message: "Price must be greater than 0" } 

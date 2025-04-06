@@ -1,10 +1,8 @@
 import toolsAndMaintainenceItems from "../models/toolsModel.js";
-import users from "../models/userModel.js";
 
 // Add a new Tools & Maintainence Item
 export const addToolSAndMaintanenceItem = async (req, res) => {
   try {
-    const { itemName, category, quantity, storageTypeLocation } = req.body;
     const userId = req.userId;
     // Check if an item with the same parameters already exists
     const existingItem = await toolsAndMaintainenceItems.findOne({

@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
-import MiniSideBar_Task from "../components/MiniSideBar_Task";
+import MiniSideBarTask from "../components/MiniSideBarTask";
 import axios from "axios";
 import { BsBell, BsBellFill, BsCalendar, BsCalendarCheck, BsArrowLeft } from "react-icons/bs";
 import { useNavigate } from "react-router-dom";
 
 const TaskProgressPage = () => {
-    const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [statusCounts, setStatusCounts] = useState({
@@ -42,7 +41,8 @@ const TaskProgressPage = () => {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            setTasks(response.data);
+
+            // Process the tasks data directly without setting tasks state
             processTaskData(response.data);
         } catch (err) {
             // Handle different types of errors
@@ -154,9 +154,39 @@ const TaskProgressPage = () => {
         navigate(-1); // Navigate back to previous page
     };
 
+    // Helper function to get priority class
+    const getPriorityClass = (priority) => {
+        switch (priority) {
+            case "High":
+                return "bg-red-100 text-red-800";
+            case "Medium":
+                return "bg-yellow-100 text-yellow-800";
+            default: // Low and any other priority
+                return "bg-green-100 text-green-800";
+        }
+    };
+
+    // Helper function to get status class for upcoming task
+    const getTaskStatusClass = (status) => {
+        return status === "In Progress"
+            ? "bg-blue-100 text-blue-800"
+            : "bg-gray-100 text-gray-800";
+    };
+
+    // Helper function for upcoming task styling
+    const getUpcomingTaskStyle = (dueDate) => {
+        const isDueToday = getDaysRemaining(dueDate) === "Due today";
+        return {
+            bgColor: isDueToday ? "bg-yellow-50" : "bg-blue-50",
+            borderColor: isDueToday ? "border-yellow-500" : "border-blue-500",
+            textColor: isDueToday ? "text-yellow-600" : "text-blue-600",
+            iconColor: isDueToday ? "text-yellow-500" : "text-blue-500"
+        };
+    };
+
     return (
         <div className="flex p-2 min-h-screen">
-            <MiniSideBar_Task />
+            <MiniSideBarTask />
             <div className="flex-1 p-6 bg-gray-100 h-screen rounded-2xl ml-4 overflow-y-auto">
                 <div className="flex items-center mb-6">
                     <button
@@ -211,12 +241,7 @@ const TaskProgressPage = () => {
                                                     </div>
                                                     <div>
                                                         <span
-                                                            className={`px-2 py-1 text-xs font-semibold rounded ${task.priority === "High"
-                                                                ? "bg-red-100 text-red-800"
-                                                                : task.priority === "Medium"
-                                                                    ? "bg-yellow-100 text-yellow-800"
-                                                                    : "bg-green-100 text-green-800"
-                                                                }`}
+                                                            className={`px-2 py-1 text-xs font-semibold rounded ${getPriorityClass(task.priority)}`}
                                                         >
                                                             {task.priority}
                                                         </span>
@@ -251,53 +276,40 @@ const TaskProgressPage = () => {
 
                                 {upcomingTasks.length > 0 ? (
                                     <div className="overflow-y-auto max-h-80">
-                                        {upcomingTasks.map((task) => (
-                                            <div
-                                                key={task._id}
-                                                className={`mb-3 p-3 rounded border-l-4 ${getDaysRemaining(task.dueDate) === "Due today"
-                                                    ? "bg-yellow-50 border-yellow-500"
-                                                    : "bg-blue-50 border-blue-500"
-                                                    }`}
-                                            >
-                                                <div className="flex justify-between items-start">
-                                                    <div className="flex-1">
-                                                        <div className="font-semibold flex items-center">
-                                                            <BsCalendar className={`mr-2 ${getDaysRemaining(task.dueDate) === "Due today"
-                                                                ? "text-yellow-500"
-                                                                : "text-blue-500"
-                                                                }`} size={16} />
-                                                            {task.title}
+                                        {upcomingTasks.map((task) => {
+                                            const style = getUpcomingTaskStyle(task.dueDate);
+
+                                            return (
+                                                <div
+                                                    key={task._id}
+                                                    className={`mb-3 p-3 rounded border-l-4 ${style.bgColor} ${style.borderColor}`}
+                                                >
+                                                    <div className="flex justify-between items-start">
+                                                        <div className="flex-1">
+                                                            <div className="font-semibold flex items-center">
+                                                                <BsCalendar className={`mr-2 ${style.iconColor}`} size={16} />
+                                                                {task.title}
+                                                            </div>
+                                                            <div className={`text-sm font-medium mt-1 ${style.textColor}`}>
+                                                                Due: {formatDate(task.dueDate)} ({getDaysRemaining(task.dueDate)})
+                                                            </div>
                                                         </div>
-                                                        <div className={`text-sm font-medium mt-1 ${getDaysRemaining(task.dueDate) === "Due today"
-                                                            ? "text-yellow-600"
-                                                            : "text-blue-600"
-                                                            }`}>
-                                                            Due: {formatDate(task.dueDate)} ({getDaysRemaining(task.dueDate)})
+                                                        <div className="flex gap-2">
+                                                            <span
+                                                                className={`px-2 py-1 rounded text-xs font-semibold ${getTaskStatusClass(task.status)}`}
+                                                            >
+                                                                {task.status}
+                                                            </span>
+                                                            <span
+                                                                className={`px-2 py-1 rounded text-xs font-semibold ${getPriorityClass(task.priority)}`}
+                                                            >
+                                                                {task.priority}
+                                                            </span>
                                                         </div>
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        <span
-                                                            className={`px-2 py-1 rounded text-xs font-semibold ${task.status === "In Progress"
-                                                                ? "bg-blue-100 text-blue-800"
-                                                                : "bg-gray-100 text-gray-800"
-                                                                }`}
-                                                        >
-                                                            {task.status}
-                                                        </span>
-                                                        <span
-                                                            className={`px-2 py-1 rounded text-xs font-semibold ${task.priority === "High"
-                                                                ? "bg-red-100 text-red-800"
-                                                                : task.priority === "Medium"
-                                                                    ? "bg-yellow-100 text-yellow-800"
-                                                                    : "bg-green-100 text-green-800"
-                                                                }`}
-                                                        >
-                                                            {task.priority}
-                                                        </span>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 ) : (
                                     <div className="p-4 bg-gray-50 text-gray-700 rounded">

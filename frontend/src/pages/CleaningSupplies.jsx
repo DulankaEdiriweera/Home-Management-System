@@ -340,13 +340,17 @@ const CleaningSupplies = () => {
     }
   };
 
-  const filteredItems = (
-    isLowStock
-      ? lowStockItems
-      : isCloseToExpiry
-      ? closeToExpiryItems
-      : cleaningSuppplies
-  ).filter(
+  let itemsToFilter;
+
+  if (isLowStock) {
+    itemsToFilter = lowStockItems;
+  } else if (isCloseToExpiry) {
+    itemsToFilter = closeToExpiryItems;
+  } else {
+    itemsToFilter = cleaningSuppplies;
+  }
+
+  const filteredItems = itemsToFilter.filter(
     (item) =>
       item.itemName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       item.category.toLowerCase().includes(searchTerm.toLowerCase())

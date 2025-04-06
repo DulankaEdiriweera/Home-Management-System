@@ -18,7 +18,8 @@ const Charts = () => {
   const [personalcareItems, setpersonalcareItems] = useState([]);
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [selectedCleaningFilter, setSelectedCleaningFilter] = useState("all");
-  const [selectedPersonalcareItemsFilter, setSelectedpersonalcareItemsFilter] = useState("all");
+  const [selectedPersonalCareItemsFilter, setSelectedPersonalCareItemsFilter] = useState("all");
+
 
   // Fetch data using Axios
   useEffect(() => {
@@ -135,15 +136,15 @@ const Charts = () => {
       const stockLevel = item.quantity;
       const minStock = item.minimumLevel;
 
-      if (selectedPersonalcareItemsFilter === "closeToExpire") {
+      if (selectedPersonalCareItemsFilter === "closeToExpire") {
         return (
           expiryDate > now && (expiryDate - now) / (1000 * 60 * 60 * 24) <= 3
         ); // Expiring within 7 days
       }
-      if (selectedPersonalcareItemsFilter === "expired") {
+      if (selectedPersonalCareItemsFilter === "expired") {
         return expiryDate < now;
       }
-      if (selectedPersonalcareItemsFilter === "lowStock") {
+      if (selectedPersonalCareItemsFilter === "lowStock") {
         return stockLevel <= minStock; // Filtering for low stock
       }
       return true; // "all"
@@ -199,19 +200,19 @@ const Charts = () => {
     {
       name: "Close to Expire",
       count: allPersonalCareItems.filter(
-        (item) => selectedPersonalcareItemsFilter === "closeToExpire"
+        (item) => selectedPersonalCareItemsFilter === "closeToExpire"
       ).length,
     },
     {
       name: "Expired",
       count: allPersonalCareItems.filter(
-        (item) => selectedPersonalcareItemsFilter === "expired"
+        (item) => selectedPersonalCareItemsFilter === "expired"
       ).length,
     },
     {
       name: "Low Stock",
       count: allPersonalCareItems.filter(
-        (item) => selectedPersonalcareItemsFilter === "lowStock"
+        (item) => selectedPersonalCareItemsFilter === "lowStock"
       ).length,
     },
   ];
@@ -298,8 +299,8 @@ const Charts = () => {
           {/* Filter Dropdown */}
           <select
             className="p-2 border border-gray-400 rounded-md bg-white text-gray-700"
-            value={selectedPersonalcareItemsFilter}
-            onChange={(e) => setSelectedpersonalcareItemsFilter(e.target.value)}
+            value={selectedPersonalCareItemsFilter}
+            onChange={(e) => setSelectedPersonalCareItemsFilter(e.target.value)}
           >
             <option value="all">All Items</option>
             <option value="closeToExpire">Items Close to Expiry</option>

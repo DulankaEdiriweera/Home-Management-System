@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
 const Home = () => {
-  // Slideshow state and functionality
   const [activeSlide, setActiveSlide] = useState(0);
   const slides = [
     {
@@ -30,11 +29,10 @@ const Home = () => {
     }
   ];
 
-  // Auto-slide functionality
   useEffect(() => {
     const interval = setInterval(() => {
       setActiveSlide((prevSlide) => (prevSlide + 1) % slides.length);
-    }, 5000); // Change slide every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [slides.length]);
@@ -44,10 +42,10 @@ const Home = () => {
       {/* Slideshow Section */}
       <div className="slideshow-container w-full relative overflow-hidden mb-8 bg-gray-100">
         <div className="slideshow-inner w-full h-[70vh] relative">
-          {slides.map((slide, index) => (
+          {slides.map((slide) => (
             <div
               key={slide.id}
-              className={`slide absolute top-0 left-0 w-full h-full transition-opacity duration-1000 ease-in-out ${index === activeSlide ? 'opacity-100' : 'opacity-0'}`}
+              className={`slide absolute top-0 left-0 w-full h-full transition-opacity duration-1000 ease-in-out ${slide.id === slides[activeSlide].id ? 'opacity-100' : 'opacity-0'}`}
             >
               <img
                 src={slide.image}
@@ -61,19 +59,21 @@ const Home = () => {
             </div>
           ))}
         </div>
+
+        {/* Slide indicators */}
         <div className="slide-indicators absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
-          {slides.map((_, index) => (
+          {slides.map((slide, index) => (
             <button
-              key={index}
+              key={slide.id}
               className={`h-2 w-2 rounded-full ${index === activeSlide ? 'bg-white' : 'bg-gray-400'}`}
               onClick={() => setActiveSlide(index)}
-              aria-label={`Go to slide ${index + 1}`}
+              aria-label={`Go to slide: ${slide.title}`}
             />
           ))}
         </div>
       </div>
 
-      {/* Main Content Section */}
+      {/* Main Content */}
       <div className="main-content w-full max-w-full mx-auto px-4">
         <div className="header-section text-center mb-8">
           <h1 className="text-4xl font-bold mb-2">
@@ -91,7 +91,7 @@ const Home = () => {
         </div>
 
         <div className="features-section">
-          {/* Inventory Section */}
+          {/* Inventory */}
           <div className="feature-block flex flex-col md:flex-row items-center mb-12">
             <div className="feature-image md:w-1/3 mb-4 md:mb-0">
               <img src="/src/assets/inventry_home.jpg" alt="Inventory management" className="rounded-lg" />
@@ -108,7 +108,7 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Tasks Section */}
+          {/* Tasks */}
           <div className="feature-block flex flex-col md:flex-row-reverse items-center mb-12">
             <div className="feature-image md:w-1/3 mb-4 md:mb-0">
               <img src="/src/assets/task_home.webp" alt="Task management" className="rounded-lg" />
@@ -125,7 +125,7 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Expenses Section */}
+          {/* Expenses */}
           <div className="feature-block flex flex-col md:flex-row items-center mb-12">
             <div className="feature-image md:w-1/3 mb-4 md:mb-0">
               <img src="/src/assets/Family-planning-budget.webp" alt="Expense tracking" className="rounded-lg" />
@@ -142,7 +142,7 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Shopping List Section */}
+          {/* Shopping List */}
           <div className="feature-block flex flex-col md:flex-row-reverse items-center mb-12">
             <div className="feature-image md:w-1/3 mb-4 md:mb-0">
               <img src="/src/assets/shoppinglist-home.avif" alt="Shopping list" className="rounded-lg" />
@@ -161,12 +161,11 @@ const Home = () => {
         </div>
 
         {/* Call to Action */}
-        <div className="cta-section text-center py-8 bg-gray-100 ">
+        <div className="cta-section text-center py-8 bg-gray-100">
           <h2 className="text-4xl font-bold mb-4">Try <span className="text-blue-500">Home Track</span></h2>
           <p className="text-2xl mb-9">
             Easily track your household inventory, groceries, expenses, and tasks – all in one place for a more organized home.
           </p>
-
         </div>
       </div>
     </div>

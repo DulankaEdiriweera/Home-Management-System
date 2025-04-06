@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import * as Yup from "yup";
+import PropTypes from "prop-types";
 
 const ReusableForm = ({ fields, onSubmit, onCancel, readOnly }) => {
   const [formData, setFormData] = useState({});
@@ -108,8 +109,8 @@ const ReusableForm = ({ fields, onSubmit, onCancel, readOnly }) => {
                 className="flex-1 border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400"
               >
                 <option value="">Select {field.label}</option>
-                {field.options.map((option, index) => (
-                  <option key={index} value={option}>
+                {field.options.map((option) => (
+                  <option key={option} value={option}>
                     {option}
                   </option>
                 ))}
@@ -161,6 +162,30 @@ const ReusableForm = ({ fields, onSubmit, onCancel, readOnly }) => {
       </form>
     </div>
   );
+};
+
+// Define PropTypes
+ReusableForm.propTypes = {
+  fields: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      type: PropTypes.string.isRequired,
+      placeholder: PropTypes.string,
+      value: PropTypes.any,
+      required: PropTypes.bool,
+      options: PropTypes.arrayOf(PropTypes.string), // only for 'select'
+    })
+  ).isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  onCancel: PropTypes.func,
+  readOnly: PropTypes.bool,
+};
+
+// Optionally, define default props
+ReusableForm.defaultProps = {
+  onCancel: () => {},
+  readOnly: false,
 };
 
 export default ReusableForm;

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PropTypes from "prop-types";
 
 const ReusableTable = ({ columns, data, onRowClick }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,6 +99,17 @@ const ReusableTable = ({ columns, data, onRowClick }) => {
       </div>
     </div>
   );
+};
+
+ReusableTable.propTypes = {
+  columns: PropTypes.arrayOf(
+    PropTypes.shape({
+      header: PropTypes.string.isRequired,
+      accessor: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  data: PropTypes.arrayOf(PropTypes.object).isRequired,
+  onRowClick: PropTypes.func,
 };
 
 export default ReusableTable;

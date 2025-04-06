@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 *{
-    font-family: Outfit;
+  font-family: 'Outfit', sans-serif;
 }
 
 .active hr{

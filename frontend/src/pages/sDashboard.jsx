@@ -14,12 +14,14 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  // State for storing shopping list items
   const [shoppingItems, setShoppingItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // Retrieve authentication token from localStorage
   const token = localStorage.getItem("token");
 
-  // Statistics state
+  // State for storing calculated statistics
   const [stats, setStats] = useState({
     totalItems: 0,
     totalEstimatedPrice: 0,
@@ -29,10 +31,15 @@ const Dashboard = () => {
     topExpensiveItems: []
   });
 
+  // Fetch data on component mount
   useEffect(() => {
     fetchShoppingListItems();
   }, []);
 
+  /**
+   * Fetches shopping list items from the API
+   * Uses authentication token for secure access
+   */
   const fetchShoppingListItems = async () => {
     setLoading(true);
     try {
@@ -51,23 +58,23 @@ const Dashboard = () => {
   };
 
   const calculateStatistics = (items) => {
-    // Total items
+    // Calculate total number of items
     const totalItems = items.length;
     
-    // Total estimated price
+    // Calculate total estimated price of all items
     const totalEstimatedPrice = items.reduce((total, item) => 
       total + (item.estimatedPrice ? parseFloat(item.estimatedPrice) : 0), 0);
     
-    // High priority items
+    // Count items with high priority
     const highPriorityItems = items.filter(item => item.priority === "High").length;
     
-    // Categories count
+    // Group items by category and count occurrences
     const categoriesCount = items.reduce((acc, item) => {
       acc[item.category] = (acc[item.category] || 0) + 1;
       return acc;
     }, {});
     
-    // Stores count
+    // Group items by store and count occurrences
     const storesCount = items.reduce((acc, item) => {
       if (item.store) {
         acc[item.store] = (acc[item.store] || 0) + 1;
@@ -75,7 +82,7 @@ const Dashboard = () => {
       return acc;
     }, {});
     
-    // Top expensive items (top 5)
+    // Get top 5 most expensive items
     const topExpensiveItems = [...items]
       .filter(item => item.estimatedPrice)
       .sort((a, b) => parseFloat(b.estimatedPrice) - parseFloat(a.estimatedPrice))
@@ -91,7 +98,6 @@ const Dashboard = () => {
     });
   };
 
-  // Prepare chart data
   const prepareCategoryChartData = () => {
     return Object.entries(stats.categoriesCount).map(([category, count]) => ({
       name: category,
@@ -116,7 +122,7 @@ const Dashboard = () => {
     return stats.topExpensiveItems.map(item => ({
       name: item.itemName,
       price: parseFloat(item.estimatedPrice),
-      id: item.id // Assuming items have an id property
+      id: item.id // Ensures unique identification for the Cell components
     }));
   };
 
@@ -130,7 +136,7 @@ const Dashboard = () => {
       .slice(0, 5); // Get top 5 stores
   };
 
-  // Colors for charts
+  // Define colors for chart visualizations
   const CATEGORY_COLORS = ['#8884d8', '#83a6ed', '#8dd1e1', '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658'];
   const PRIORITY_COLORS = {
     High: '#ef4444',  // Red
@@ -138,7 +144,7 @@ const Dashboard = () => {
     Low: '#10b981'    // Green
   };
 
-  // Cards data
+  // Configuration for summary cards
   const infoCards = [
     {
       id: "total-items",
@@ -171,6 +177,7 @@ const Dashboard = () => {
     },
   ];
 
+  // Display loading spinner while data is being fetched
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
@@ -179,6 +186,7 @@ const Dashboard = () => {
     );
   }
 
+  // Display error message if data fetching fails
   if (error) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
@@ -198,7 +206,9 @@ const Dashboard = () => {
 
   return (
     <div className="flex p-2 bg-gray-50">
+      {/* Main dashboard container */}
       <div className="flex-1 p-6 bg-white shadow-lg min-h-screen rounded-2xl ml-4">
+        {/* Dashboard header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-800">
             <FaChartPie className="inline-block mr-2 text-blue-600" />
@@ -207,7 +217,7 @@ const Dashboard = () => {
           <p className="text-gray-500 mt-2">Overview of your shopping list statistics</p>
         </div>
 
-        {/* Navigation buttons */}
+        {/* Navigation buttons section */}
         <div className="flex justify-end mb-6">
           <button
             onClick={() => navigate("/shoppingList")}
@@ -217,7 +227,7 @@ const Dashboard = () => {
           </button>
         </div>
 
-        {/* Info Cards */}
+        {/* Key metrics summary cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {infoCards.map((card) => (
             <div 
@@ -228,6 +238,7 @@ const Dashboard = () => {
                 <div>
                   <h3 className="text-gray-500 text-sm uppercase font-semibold">{card.title}</h3>
                   <p className="text-2xl font-bold mt-1">{card.value}</p>
+                  {/* Display percentage indicator if available */}
                   {card.percentage !== undefined && (
                     <div className="flex items-center mt-2 text-sm">
                       <span>{card.percentage}% of total</span>
@@ -247,9 +258,9 @@ const Dashboard = () => {
           ))}
         </div>
 
-        {/* Charts Section - First Row */}
+        {/* First row of charts: Category and Priority Distribution */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Category Distribution Chart */}
+          {/* Category Distribution Pie Chart */}
           <div className="bg-white p-4 rounded-xl shadow-md border border-gray-100">
             <h3 className="font-semibold text-lg mb-4 text-gray-700">Category Distribution</h3>
             <div className="h-64">
@@ -267,6 +278,7 @@ const Dashboard = () => {
                       nameKey="name"
                       label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                     >
+                      {/* Assign different colors to each category slice */}
                       {prepareCategoryChartData().map((entry) => (
                         <Cell key={`category-${entry.name}`} fill={CATEGORY_COLORS[prepareCategoryChartData().findIndex(item => item.name === entry.name) % CATEGORY_COLORS.length]} />
                       ))}
@@ -283,7 +295,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Priority Distribution Chart */}
+          {/* Priority Distribution Pie Chart */}
           <div className="bg-white p-4 rounded-xl shadow-md border border-gray-100">
             <h3 className="font-semibold text-lg mb-4 text-gray-700">Priority Distribution</h3>
             <div className="h-64">
@@ -301,6 +313,7 @@ const Dashboard = () => {
                       nameKey="name"
                       label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
                     >
+                      {/* Assign semantic colors to priority levels */}
                       {preparePriorityChartData().map((entry) => (
                         <Cell key={`priority-${entry.name}`} fill={PRIORITY_COLORS[entry.name]} />
                       ))}
@@ -318,9 +331,9 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Charts Section - Second Row */}
+        {/* Second row of charts: Expensive Items and Store Usage */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Most Expensive Items Chart */}
+          {/* Most Expensive Items Bar Chart */}
           <div className="bg-white p-4 rounded-xl shadow-md border border-gray-100">
             <h3 className="font-semibold text-lg mb-4 text-gray-700">Most Expensive Items</h3>
             <div className="h-64">
@@ -349,7 +362,7 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Top Stores Chart */}
+          {/* Most Used Stores Bar Chart */}
           <div className="bg-white p-4 rounded-xl shadow-md border border-gray-100">
             <h3 className="font-semibold text-lg mb-4 text-gray-700">Most Used Stores</h3>
             <div className="h-64">

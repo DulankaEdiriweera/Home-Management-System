@@ -48,7 +48,7 @@ const FoodAndBeverages = () => {
               Authorization: `Bearer ${token}`, // Add the token to the Authorization header
             },
           }
-        ); // Adjust API URL if needed
+        ); 
 
         // Transform data: Extract only the date part
         const formattedData = response.data.map((item) => ({

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ExpenseSidebar from "../components/ExpensesSideBar";
 
 const ExpensesHome = () => {
-  const [expenses, setExpenses] = useState([]);
+  const [expenses, setExpenses] = useState([]);  //// State variables to manage expense data, UI state, and user selections
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState("");
@@ -10,16 +10,19 @@ const ExpensesHome = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const token = localStorage.getItem("token");
 
+  // Fetch expenses once when the component mounts
   useEffect(() => {
     fetchExpenses();
   }, []);
 
+  // Reprocess chart data when expenses or selectedMonth changes
   useEffect(() => {
     if (expenses.length > 0) {
       processDataForChart();
     }
   }, [expenses, selectedMonth]);
 
+  // Fetch expense data from the API
   const fetchExpenses = async () => {
     try {
       setLoading(true);
@@ -43,6 +46,7 @@ const ExpensesHome = () => {
     }
   };
 
+  // Prepare chart data based on category and month
   const processDataForChart = () => {
     const filteredExpenses = selectedMonth 
       ? expenses.filter(expense => expense.month === selectedMonth)
@@ -54,6 +58,7 @@ const ExpensesHome = () => {
     );
     setTotalAmount(total);
 
+    // Group expenses by category
     const categories = {};
     filteredExpenses.forEach(expense => {
       const category = expense.category;
@@ -63,6 +68,7 @@ const ExpensesHome = () => {
       categories[category] += parseFloat(expense.amount);
     });
 
+    // Convert grouped data into chart-friendly format
     const chartData = Object.keys(categories).map((category, index) => {
       return {
         category,
@@ -75,6 +81,7 @@ const ExpensesHome = () => {
     setCategoryData(chartData);
   };
 
+  // Get color for each category slice in the chart
   const getColorByIndex = (index) => {
     const colors = [
       "#3B82F6", "#EF4444", "#10B981", "#F59E0B", "#8B5CF6", 
@@ -83,6 +90,7 @@ const ExpensesHome = () => {
     return colors[index % colors.length];
   };
 
+  // Format amount as LKR currency
   const formatAsLKR = (amount) => {
     return new Intl.NumberFormat('si-LK', {
       style: 'currency',
@@ -91,6 +99,7 @@ const ExpensesHome = () => {
     }).format(amount);
   };
 
+  // Create a custom donut chart with SVG
   const renderDonutChart = () => {
     const size = 250;
     const radius = size / 2;
@@ -98,11 +107,14 @@ const ExpensesHome = () => {
     const center = size / 2;
     
     let startAngle = 0;
+
+    // Map each category to a segment in the chart
     const segments = categoryData.map((item, index) => {
       const percentage = parseFloat(item.percentage);
       const angle = (percentage / 100) * 360;
       const endAngle = startAngle + angle;
       
+      // Calculate outer and inner arc points
       const x1 = center + radius * Math.cos(Math.PI * startAngle / 180);
       const y1 = center + radius * Math.sin(Math.PI * startAngle / 180);
       const x2 = center + radius * Math.cos(Math.PI * endAngle / 180);
@@ -115,6 +127,7 @@ const ExpensesHome = () => {
       
       const largeArcFlag = angle > 180 ? 1 : 0;
       
+      // SVG path for donut slice
       const path = [
         `M ${x1} ${y1}`,
         `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
@@ -136,6 +149,7 @@ const ExpensesHome = () => {
       );
     });
 
+    // Render SVG with center text
     return (
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
         {segments}
@@ -163,12 +177,14 @@ const ExpensesHome = () => {
     );
   };
 
+  // Show message if no data
   const renderNoDataMessage = () => (
     <div className="bg-white rounded-lg p-6 shadow-md text-center">
       <p className="text-gray-600">No expense data available for the selected period.</p>
     </div>
   );
 
+  // Conditionally render content based on state
   let content;
   if (error) {
     content = (
@@ -197,6 +213,7 @@ const ExpensesHome = () => {
           </div>
         </div>
 
+        {/* Category breakdown section */}
         <div className="bg-white rounded-lg p-6 shadow-md">
           <h3 className="text-xl font-bold mb-4">Category Breakdown</h3>
           <div className="space-y-4">
@@ -219,6 +236,7 @@ const ExpensesHome = () => {
             ))}
           </div>
 
+          {/* Total amount */}
           <div className="mt-6 pt-4 border-t border-gray-200">
             <div className="flex justify-between font-bold">
               <span>Total:</span>
@@ -227,6 +245,7 @@ const ExpensesHome = () => {
           </div>
         </div>
 
+        {/* Summary insights */}
         <div className="bg-white rounded-lg p-6 shadow-md col-span-3">
           <h3 className="text-xl font-bold mb-4">Key Insights</h3>
 
@@ -242,6 +261,7 @@ const ExpensesHome = () => {
                 </p>
               </div>
 
+              {/* Lowest category */}
               <div className="bg-green-50 p-4 rounded-lg">
                 <p className="text-sm text-green-800 font-medium">Lowest Expense Category</p>
                 <p className="text-xl font-bold mt-1">
@@ -252,6 +272,7 @@ const ExpensesHome = () => {
                 </p>
               </div>
 
+              {/* Average per category */}
               <div className="bg-purple-50 p-4 rounded-lg">
                 <p className="text-sm text-purple-800 font-medium">Average Per Category</p>
                 <p className="text-xl font-bold mt-1">
@@ -268,6 +289,7 @@ const ExpensesHome = () => {
     );
   }
 
+  // Final return with sidebar and main content
   return (
     <div className="flex p-2">
       <ExpenseSidebar />
@@ -276,6 +298,7 @@ const ExpensesHome = () => {
           <h1 className="text-2xl font-bold mb-4 text-center">Welcome To The Expense Tracker</h1>
           <h2 className="text-2xl font-bold mb-4">Expense Overview</h2>
 
+          {/* Month filter */}
           <div className="mb-4">
             <label htmlFor="month-select" className="mr-2 font-medium">Filter by Month:</label>
             <select

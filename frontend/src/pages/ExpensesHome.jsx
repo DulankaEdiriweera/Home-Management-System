@@ -48,12 +48,12 @@ const ExpensesHome = () => {
 
   // Prepare chart data based on category and month
   const processDataForChart = () => {
-    const filteredExpenses = selectedMonth 
+    const filteredExpenses = selectedMonth
       ? expenses.filter(expense => expense.month === selectedMonth)
       : expenses;
 
     const total = filteredExpenses.reduce(
-      (sum, expense) => sum + parseFloat(expense.amount), 
+      (sum, expense) => sum + parseFloat(expense.amount),
       0
     );
     setTotalAmount(total);
@@ -84,7 +84,7 @@ const ExpensesHome = () => {
   // Get color for each category slice in the chart
   const getColorByIndex = (index) => {
     const colors = [
-      "#3B82F6", "#EF4444", "#10B981", "#F59E0B", "#8B5CF6", 
+      "#3B82F6", "#EF4444", "#10B981", "#F59E0B", "#8B5CF6",
       "#EC4899", "#06B6D4", "#F97316", "#6366F1", "#14B8A6"
     ];
     return colors[index % colors.length];
@@ -92,7 +92,7 @@ const ExpensesHome = () => {
 
   // Format amount as LKR currency
   const formatAsLKR = (amount) => {
-    return new Intl.NumberFormat('si-LK', {
+    return new Intl.NumberFormat('en-LK', {
       style: 'currency',
       currency: 'LKR',
       minimumFractionDigits: 2
@@ -105,7 +105,7 @@ const ExpensesHome = () => {
     const radius = size / 2;
     const innerRadius = radius * 0.6;
     const center = size / 2;
-    
+
     let startAngle = 0;
 
     // Map each category to a segment in the chart
@@ -113,20 +113,20 @@ const ExpensesHome = () => {
       const percentage = parseFloat(item.percentage);
       const angle = (percentage / 100) * 360;
       const endAngle = startAngle + angle;
-      
+
       // Calculate outer and inner arc points
       const x1 = center + radius * Math.cos(Math.PI * startAngle / 180);
       const y1 = center + radius * Math.sin(Math.PI * startAngle / 180);
       const x2 = center + radius * Math.cos(Math.PI * endAngle / 180);
       const y2 = center + radius * Math.sin(Math.PI * endAngle / 180);
-      
+
       const x3 = center + innerRadius * Math.cos(Math.PI * endAngle / 180);
       const y3 = center + innerRadius * Math.sin(Math.PI * endAngle / 180);
       const x4 = center + innerRadius * Math.cos(Math.PI * startAngle / 180);
       const y4 = center + innerRadius * Math.sin(Math.PI * startAngle / 180);
-      
+
       const largeArcFlag = angle > 180 ? 1 : 0;
-      
+
       // SVG path for donut slice
       const path = [
         `M ${x1} ${y1}`,
@@ -137,10 +137,10 @@ const ExpensesHome = () => {
       ].join(' ');
 
       startAngle = endAngle;
-      
+
       return (
         <path
-          key={item.category} 
+          key={item.category}
           d={path}
           fill={item.color}
           stroke="#fff"
@@ -219,8 +219,8 @@ const ExpensesHome = () => {
           <div className="space-y-4">
             {categoryData.map((item) => (
               <div key={item.category} className="flex items-center">
-                <div 
-                  className="w-4 h-4 rounded-full mr-3" 
+                <div
+                  className="w-4 h-4 rounded-full mr-3"
                   style={{ backgroundColor: item.color }}
                 ></div>
                 <div className="flex-1">

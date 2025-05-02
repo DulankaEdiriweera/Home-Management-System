@@ -1,19 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
 import ExpenseSideBar from "../components/ExpensesSideBar";
 
-const ExpenseTracker = () => {
-  const [expenses, setExpenses] = useState([]);
-  const [showModal, setShowModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [expenseToDelete, setExpenseToDelete] = useState(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [selectedExpenseId, setSelectedExpenseId] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchMonth, setSearchMonth] = useState("");
-  const [error, setError] = useState(null);
-  const printRef = useRef();
-  const token = localStorage.getItem("token");
+//Expenses add page 
 
+const ExpenseTracker = () => {
+  const [expenses, setExpenses] = useState([]); // State to store list of expenses
+  const [showModal, setShowModal] = useState(false); // State to control visibility of the Add/Edit Expense modal
+  const [showDeleteModal, setShowDeleteModal] = useState(false);  // State to control visibility of the Delete Confirmation modal
+  const [expenseToDelete, setExpenseToDelete] = useState(null); // State to hold the expense selected for deletion
+  const [isUpdating, setIsUpdating] = useState(false);  // Flag to indicate whether the form is in update mode
+  const [selectedExpenseId, setSelectedExpenseId] = useState(null);  // ID of the expense currently being edited
+  const [searchQuery, setSearchQuery] = useState("");  // Search input for filtering expenses by description or other text
+  const [searchMonth, setSearchMonth] = useState("");  // Search filter for selecting expenses by month
+  const [error, setError] = useState(null);  // State to hold error messages if any occur during operations
+  const printRef = useRef();  // Reference to the section/component to be printed (e.g., for reports)
+  const token = localStorage.getItem("token");  // Retrieve authentication token from localStorage
+
+  // Form data for adding or updating an expense
   const [formData, setFormData] = useState({
     amount: "",
     month: "",
@@ -23,10 +26,12 @@ const ExpenseTracker = () => {
     description: "",
   });
 
+  // Run this when the component first loads
   useEffect(() => {
-    fetchExpenses();
+    fetchExpenses();  // Get all expenses from the server
   }, []);
 
+  // Function to get expenses from the server
   const fetchExpenses = async () => {
     try {
       const response = await fetch("http://localhost:4000/expenses", {
@@ -40,15 +45,17 @@ const ExpenseTracker = () => {
       if (!response.ok) throw new Error("Failed to fetch data");
 
       const data = await response.json();
-      setExpenses(data);
+      setExpenses(data); // Save data to state
     } catch (error) {
       console.error("Error fetching expenses:", error);
       setError("Failed to load expenses. Please try again.");
     }
   };
 
+  // Handle form submission for adding or updating an expense
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Check if any field is empty
     if (
       !formData.amount ||
       !formData.month ||
@@ -62,49 +69,55 @@ const ExpenseTracker = () => {
     }
 
     try {
-      setError(null);
+      setError(null); // Clear any previous errors
+
+      // Decide the URL and method based on whether it's an update or a new entry
       const url = isUpdating
-        ? `http://localhost:4000/expenses/${selectedExpenseId}`
-        : "http://localhost:4000/expenses";
+        ? `http://localhost:4000/expenses/${selectedExpenseId}`  // Update existing expense
+        : "http://localhost:4000/expenses";   // Create new expense
       const method = isUpdating ? "PUT" : "POST";
 
+      // Send the request to the server
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData),  // Send the form data
       });
 
       if (!response.ok) throw new Error("Failed to submit data");
 
-      // After successful submission, fetch fresh data
+     // Refresh the expense list after a successful save
       await fetchExpenses();
 
-      setShowModal(false);
-      resetForm();
+      setShowModal(false);  // Close the form modal
+      resetForm();    // Clear the form fields
     } catch (error) {
-      console.error("Error submitting expense:", error);
+      console.error("Error submitting expense:", error);  // Handle any errors during form submission
       setError("Failed to submit. Please try again.");
     }
   };
 
+  // When the delete icon/button is clicked, store the ID and show the delete confirmation modal
   const handleDeleteClick = (id) => {
     setExpenseToDelete(id);
     setShowDeleteModal(true);
   };
 
+  // Handle actual deletion of an expense
   const handleDelete = async () => {
     if (!expenseToDelete) {
       console.error("No expense ID provided for deletion");
-      setError("No expense selected for deletion.");
+      setError("No expense selected for deletion.");  // Show error if no ID is provided
       return;
     }
 
     try {
-      console.log("Deleting expense with ID:", expenseToDelete);
+      console.log("Deleting expense with ID:", expenseToDelete);  // Show error if no ID is provided
 
+      // Send DELETE request to the server to remove the selected expense
       const response = await fetch(
         `http://localhost:4000/expenses/${expenseToDelete}`,
         {
@@ -115,8 +128,9 @@ const ExpenseTracker = () => {
         }
       );
 
-      const responseData = await response.json();
+      const responseData = await response.json();  // Set method to DELETE
 
+      // Check if the deletion was successful
       if (!response.ok) {
         console.error("Error response from backend:", responseData);
         throw new Error(responseData.message || "Failed to delete expense");
@@ -129,10 +143,11 @@ const ExpenseTracker = () => {
     } catch (error) {
       console.error("Error deleting expense:", error);
       setError(error.message);
-      setShowDeleteModal(false);
+      setShowDeleteModal(false);  // Close the delete confirmation modal after successful deletion
     }
   };
 
+  // Format a date string to 'YYYY-MM-DD' format for input fields
   const formatDateForInput = (dateString) => {
     try {
       const date = new Date(dateString);
@@ -145,6 +160,7 @@ const ExpenseTracker = () => {
     }
   };
 
+  // When the user clicks "Edit", fill the form with the selected expense data
   const handleUpdateClick = (expense) => {
     setFormData({
       amount: expense.amount,
@@ -155,8 +171,8 @@ const ExpenseTracker = () => {
       description: expense.description,
     });
     setSelectedExpenseId(expense._id);
-    setIsUpdating(true);
-    setShowModal(true);
+    setIsUpdating(true);  // Enable update mode
+    setShowModal(true);   // Open the modal with form pre-filled
   };
 
   const resetForm = () => {
@@ -173,6 +189,7 @@ const ExpenseTracker = () => {
     setError(null);
   };
 
+  // Convert month name (e.g., "March") to two-digit month number (e.g., "03")
   const getMonthNumber = (monthName) => {
     return (new Date(Date.parse(monthName + " 1, 2024")).getMonth() + 1)
       .toString()
@@ -185,26 +202,32 @@ const ExpenseTracker = () => {
     const monthNumber = getMonthNumber(monthName);
     const year = getCurrentYear();
     const lastDay = new Date(year, parseInt(monthNumber), 0).getDate();
-    return lastDay.toString().padStart(2, "0");
+    return lastDay.toString().padStart(2, "0");  // Return as two-digit string
   };
 
+  // Handle input field changes in the form
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // If the month is changed, also reset the date
     if (name === "month") {
       setFormData((prev) => ({
         ...prev,
         month: value,
-        date: "",
+        date: "",  // Clear date to force re-selection based on new month
       }));
-    } else if (name === "amount") {
+    } 
+    // Allow only valid numbers for amount (including empty input)
+    else if (name === "amount") {
       if (value === "" || (!isNaN(value) && parseFloat(value) >= 0)) {
         setFormData((prev) => ({
           ...prev,
           [name]: value,
         }));
       }
-    } else {
+    } 
+    // For all other fields, update normally
+    else {
       setFormData((prev) => ({
         ...prev,
         [name]: value,
@@ -225,6 +248,7 @@ const ExpenseTracker = () => {
     }).format(amount);
   };
 
+  // Filter expenses by search query and selected month
   const filteredExpenses = expenses.filter(
     (expense) =>
       (searchQuery === "" ||
@@ -232,6 +256,7 @@ const ExpenseTracker = () => {
       (searchMonth === "" || expense.month === searchMonth)
   );
 
+  // Calculate total amount from filtered expenses
   const totalAmount = filteredExpenses.reduce(
     (total, expense) => total + parseFloat(expense.amount),
     0
@@ -245,6 +270,7 @@ const ExpenseTracker = () => {
       return;
     }
 
+    //generate a printable expense report
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -330,6 +356,7 @@ const ExpenseTracker = () => {
       <div className="flex-1 p-6 bg-gray-200 h-screen rounded-2xl ml-2">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Expense Tracker</h2>
+          {/* Search by category and filter by month */}
           <div className="flex gap-4">
             <div className="flex gap-2">
               <input
@@ -385,6 +412,7 @@ const ExpenseTracker = () => {
           </div>
         )}
 
+        {/* Expenses table */}
         <div className="overflow-x-auto" ref={printRef}>
           <table className="w-full border border-gray-300 text-center rounded-lg overflow-hidden">
             <thead>
@@ -416,6 +444,7 @@ const ExpenseTracker = () => {
                 </tr>
               ) : (
                 <>
+                {/* Map and render each expense row */}
                   {filteredExpenses.map((expense) => (
                     <tr key={expense._id} className="border-t">
                       <td className="p-3">{expense.month}</td>
@@ -442,6 +471,7 @@ const ExpenseTracker = () => {
                       </td>
                     </tr>
                   ))}
+                   {/* Form for adding/updating */}
                   <tr className="bg-gray-100 border-t">
                     <td className="p-3 font-bold">
                       Total = {formatAsLKR(totalAmount)}
@@ -454,6 +484,7 @@ const ExpenseTracker = () => {
           </table>
         </div>
 
+        {/* Modal for adding or updating an expense */}
         {showModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -475,6 +506,7 @@ const ExpenseTracker = () => {
                 </div>
               )}
 
+              {/* Form for adding/updating */}
               <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -640,6 +672,7 @@ const ExpenseTracker = () => {
           </div>
         )}
 
+        {/* Delete confirmation modal */}
         {showDeleteModal && (
           <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
             <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
@@ -666,6 +699,7 @@ const ExpenseTracker = () => {
                   Are you sure you want to delete this expense? This action
                   cannot be undone.
                 </p>
+                {/* Delete or cancel actions */}
                 <div className="flex justify-center gap-4">
                   <button
                     onClick={() => setShowDeleteModal(false)}

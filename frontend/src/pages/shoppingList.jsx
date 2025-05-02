@@ -8,16 +8,17 @@ import Swal from "sweetalert2";
 
 const ShoppingList = () => {
   const navigate = useNavigate();
-  const [shoppingItems, setShoppingItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const token = localStorage.getItem("token");
-  const modalRef = useRef(null);
+  // Main state variables
+  const [shoppingItems, setShoppingItems] = useState([]); // Stores all shopping items
+  const [loading, setLoading] = useState(true); // Loading state for API calls
+  const [error, setError] = useState(null); // Error state for API failures
+  const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering items
+  const token = localStorage.getItem("token"); // Auth token from local storage
+  const modalRef = useRef(null); // Reference to modal dialog element
   
-  // Modal state
-  const [showUpdateModal, setShowUpdateModal] = useState(false);
-  const [currentItem, setCurrentItem] = useState(null);
+  // Modal and form state
+  const [showUpdateModal, setShowUpdateModal] = useState(false); // Controls modal visibility
+  const [currentItem, setCurrentItem] = useState(null); // Currently selected item for editing
   const [formData, setFormData] = useState({
     itemName: "",
     quantity: "",
@@ -26,14 +27,20 @@ const ShoppingList = () => {
     priority: "",
     estimatedPrice: "",
     store: ""
-  });
-  const [formErrors, setFormErrors] = useState({});
+  }); // Form data for item updates
+  const [formErrors, setFormErrors] = useState({}); // Form validation errors
 
+  /**
+   * Fetch shopping list items on component mount
+   */
   useEffect(() => {
     fetchShoppingListItems();
   }, []);
 
-  // Control the dialog element when modal state changes
+  /**
+   * Control the dialog element when modal state changes
+   * Opens or closes the modal dialog based on showUpdateModal state
+   */
   useEffect(() => {
     if (modalRef.current) {
       if (showUpdateModal) {
@@ -44,6 +51,10 @@ const ShoppingList = () => {
     }
   }, [showUpdateModal]);
 
+  /**
+   * Fetches all shopping list items from the API
+   * Updates state with items or error message
+   */
   const fetchShoppingListItems = async () => {
     setLoading(true);
     try {
@@ -60,7 +71,6 @@ const ShoppingList = () => {
     }
   };
 
-  // Extracted delete confirmation into separate function
   const confirmDelete = (id) => {
     Swal.fire({
       title: "Are you sure?",
@@ -78,7 +88,6 @@ const ShoppingList = () => {
     });
   };
 
-  // Extracted actual delete operation into separate function
   const performDelete = async (id) => {
     try {
       await axios.delete(`http://localhost:4000/shoppingList/${id}`, {
@@ -86,6 +95,7 @@ const ShoppingList = () => {
           Authorization: `Bearer ${token}`,
         },
       });
+      // Update state by filtering out the deleted item
       setShoppingItems((prevItems) => prevItems.filter((item) => item._id !== id));
       Swal.fire("Deleted!", "The item has been removed from your shopping list.", "success");
     } catch (error) {
@@ -97,6 +107,10 @@ const ShoppingList = () => {
     confirmDelete(id);
   };  
 
+  /**
+   * Fetches only high priority items from the API
+   * Updates state with filtered items
+   */
   const fetchHighPriorityItems = async () => {
     setLoading(true);
     try {
@@ -113,12 +127,20 @@ const ShoppingList = () => {
     }
   };
 
+  /**
+   * Filters shopping items based on the search term
+   * Searches across multiple fields: itemName, category, store, priority
+   */
   const filteredItems = shoppingItems.filter((item) =>
     [item.itemName, item.category, item.store, item.priority]
       .filter(Boolean)
       .some((field) => field.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
+  /**
+   * Exports the current filtered shopping list to a PDF document
+   * Includes formatted table and total price calculation
+   */
   const exportToPDF = () => {
     const doc = new jsPDF();
     doc.setFontSize(18);
@@ -135,6 +157,7 @@ const ShoppingList = () => {
       item.estimatedPrice ? `LKR ${Number(item.estimatedPrice).toFixed(2)}` : "N/A",
     ]);
   
+    // Create table with shopping list data
     autoTable(doc, {  
       head: [tableColumn],
       body: tableRows,
@@ -144,20 +167,24 @@ const ShoppingList = () => {
       headStyles: { fillColor: [22, 101, 216], textColor: [255, 255, 255] },
     });
   
+    // Calculate and add total estimated price
     const totalEstimatedPrice = filteredItems.reduce((total, item) => {
       return total + (item.estimatedPrice ? parseFloat(item.estimatedPrice) : 0);
     }, 0);
   
     const finalY = doc.lastAutoTable.finalY || 25;
     
+    // Add separator line
     doc.setDrawColor(22, 101, 216);
     doc.setLineWidth(0.5);
     doc.line(14, finalY + 10, 196, finalY + 10);
     
+    // Add total price text
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text(`Total Estimated Price: LKR ${totalEstimatedPrice.toFixed(2)}`, 14, finalY + 20);
   
+    // Save the PDF
     doc.save("shopping-list.pdf");
   };
 
@@ -201,6 +228,7 @@ const ShoppingList = () => {
   const validateForm = () => {
     const errors = {};
     
+    // Check all required fields and validate formats
     if (!formData.itemName) errors.itemName = "Item Name is required";
     if (!formData.quantity) errors.quantity = "Quantity is required";
     else if (formData.quantity < 1) errors.quantity = "Quantity must be at least 1";
@@ -220,7 +248,10 @@ const ShoppingList = () => {
     return Object.keys(errors).length === 0;
   };
 
-  // Extracted update API call into separate function
+  /**
+   * Performs the API call to update an item
+   * Updates local state on success
+   */
   const performUpdate = async () => {
     try {
       await axios.put(`http://localhost:4000/shoppingList/${currentItem._id}`, formData, {
@@ -229,6 +260,7 @@ const ShoppingList = () => {
         },
       });
       
+      // Update the item in the local state
       setShoppingItems(prevItems =>
         prevItems.map(item => 
           item._id === currentItem._id ? { ...item, ...formData } : item
@@ -262,14 +294,17 @@ const ShoppingList = () => {
     }
   };
 
+  /**
+   * Resets all filters and fetches all items
+   */
   const resetFilter = () => {
     fetchShoppingListItems();
     setSearchTerm("");
   };
 
-  // Extracted nested ternary into separate function
   const renderTableContent = () => {
     if (loading) {
+      // Show loading spinner
       return (
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -278,6 +313,7 @@ const ShoppingList = () => {
     }
     
     if (error) {
+      // Show error message
       return (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
           <strong className="font-bold">Error! </strong>
@@ -287,6 +323,7 @@ const ShoppingList = () => {
     }
     
     if (filteredItems.length === 0) {
+      // Show empty state
       return (
         <div className="text-center py-12 bg-gray-50 rounded-xl">
           <FaShoppingCart className="mx-auto text-5xl text-gray-300 mb-4" />
@@ -296,6 +333,7 @@ const ShoppingList = () => {
       );
     }
     
+    // Show data table
     return (
       <div className="w-full overflow-x-auto rounded-xl shadow-md">
         <table className="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
@@ -357,7 +395,6 @@ const ShoppingList = () => {
     );
   };
 
-  // Extracted price formatting logic to separate function
   const formatPrice = (price) => {
     if (!price) return "N/A";
     return `LKR ${Number(price).toLocaleString("en-US", { minimumFractionDigits: 2 })}`;
@@ -365,7 +402,9 @@ const ShoppingList = () => {
 
   return (
     <div className="flex p-2 bg-gray-50">
+      {/* Main content container */}
       <div className="flex-1 p-6 bg-white shadow-lg min-h-screen rounded-2xl ml-4">
+        {/* Page header */}
         <div className="mb-8 text-center">
           <h1 className="text-3xl font-bold text-gray-800">
             <FaShoppingCart className="inline-block mr-2 text-blue-600" />
@@ -374,7 +413,9 @@ const ShoppingList = () => {
           <p className="text-gray-500 mt-2">Manage your shopping items efficiently</p>
         </div>
 
+        {/* Action buttons and search bar */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          {/* Add new item button */}
           <button
             onClick={() => navigate("/add-item")}
             className="bg-blue-600 text-white px-4 py-2 rounded-xl font-semibold hover:bg-blue-700 shadow-md transition-all duration-200 flex items-center gap-2"
@@ -382,6 +423,7 @@ const ShoppingList = () => {
             <FaPlus /> Add New Item
           </button>
 
+          {/* Search input */}
           <div className="relative flex items-center flex-grow max-w-md mx-2">
             <label htmlFor="search-items" className="sr-only">Search items</label>
             <input
@@ -404,6 +446,7 @@ const ShoppingList = () => {
             )}
           </div>
 
+          {/* Filter and export buttons */}
           <div className="flex gap-3">
             <button
               onClick={fetchHighPriorityItems}
@@ -428,16 +471,19 @@ const ShoppingList = () => {
           </div>
         </div>
 
+        {/* Table content section */}
         <div className="pt-5">
           {renderTableContent()}
         </div>
       </div>
 
+      {/* Update Item Modal */}
       <dialog
         ref={modalRef}
         className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl"
         onClose={closeUpdateModal}
       >
+        {/* Modal Header */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center space-x-3">
             <div className="bg-blue-100 p-2 rounded-full">
@@ -454,8 +500,9 @@ const ShoppingList = () => {
           </button>
         </div>
         
+        {/* Update Form */}
         <form onSubmit={handleUpdateSubmit} className="space-y-4">
-          {/* Item Name */}
+          {/* Item Name Field */}
           <div>
             <label htmlFor="itemName" className="block text-gray-700 mb-2 font-medium">Item Name</label>
             <div className="relative">
@@ -473,9 +520,9 @@ const ShoppingList = () => {
             {formErrors.itemName && <p className="text-red-500 text-sm mt-1">{formErrors.itemName}</p>}
           </div>
 
-          {/* Quantity and Unit in a 2-column layout */}
+          {/* Quantity and Unit fields in a 2-column layout */}
           <div className="grid grid-cols-2 gap-4">
-            {/* Quantity */}
+            {/* Quantity Field */}
             <div>
               <label htmlFor="quantity" className="block text-gray-700 mb-2 font-medium">Quantity</label>
               <div className="relative">
@@ -493,7 +540,7 @@ const ShoppingList = () => {
               {formErrors.quantity && <p className="text-red-500 text-sm mt-1">{formErrors.quantity}</p>}
             </div>
 
-            {/* Unit */}
+            {/* Unit Field */}
             <div>
               <label htmlFor="unit" className="block text-gray-700 mb-2 font-medium">Unit</label>
               <div className="relative">
@@ -517,7 +564,7 @@ const ShoppingList = () => {
             </div>
           </div>
 
-          {/* Category */}
+          {/* Category Field */}
           <div>
             <label htmlFor="category" className="block text-gray-700 mb-2 font-medium">Category</label>
             <div className="relative">
@@ -541,7 +588,7 @@ const ShoppingList = () => {
             {formErrors.category && <p className="text-red-500 text-sm mt-1">{formErrors.category}</p>}
           </div>
 
-          {/* Priority */}
+          {/* Priority Field */}
           <div>
             <label htmlFor="priority" className="block text-gray-700 mb-2 font-medium">Priority</label>
             <div className="relative">
@@ -562,7 +609,7 @@ const ShoppingList = () => {
             {formErrors.priority && <p className="text-red-500 text-sm mt-1">{formErrors.priority}</p>}
           </div>
 
-          {/* Store */}
+          {/* Store Field */}
           <div>
             <label htmlFor="store" className="block text-gray-700 mb-2 font-medium">Store</label>
             <div className="relative">
@@ -580,7 +627,7 @@ const ShoppingList = () => {
             {formErrors.store && <p className="text-red-500 text-sm mt-1">{formErrors.store}</p>}
           </div>
 
-          {/* Estimated Price */}
+          {/* Estimated Price Field */}
           <div>
             <label htmlFor="estimatedPrice" className="block text-gray-700 mb-2 font-medium">Estimated Price</label>
             <div className="relative">
@@ -598,7 +645,7 @@ const ShoppingList = () => {
             {formErrors.estimatedPrice && <p className="text-red-500 text-sm mt-1">{formErrors.estimatedPrice}</p>}
           </div>
 
-          {/* Action Buttons */}
+          {/* Form Action Buttons */}
           <div className="flex justify-end space-x-3 mt-6">
             <button
               type="button"
